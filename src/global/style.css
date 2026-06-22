@@ -2494,3 +2494,15 @@ kbd{
 .public-page button:disabled {
   cursor: default;
 }
+
+/* ── Pricing card hover lift ── */
+.pricing-plan-card {
+  transform: translateY(0);
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  will-change: transform;
+}
+.pricing-plan-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 18px 45px rgba(15,23,42,.14);
+}
+/* ── End pricing card hover lift ── */

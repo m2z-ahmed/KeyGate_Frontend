@@ -93,8 +93,6 @@ export const PLANS = [
       '30 Days Logs',
       'Community Support',
     ],
-    cta: 'Current plan',
-    current: true,
   },
   {
     name: 'Starter',
@@ -109,7 +107,6 @@ export const PLANS = [
       '30 Days Logs',
       'Priority Email Support',
     ],
-    cta: 'Upgrade to Starter',
   },
   {
     name: 'Pro',
@@ -128,7 +125,6 @@ export const PLANS = [
     ],
     highlight: true,
     badge: 'Most Popular',
-    cta: 'Upgrade to Pro',
   },
   {
     name: 'Scale',
@@ -144,7 +140,6 @@ export const PLANS = [
       'Advanced Controls+',
       'Everything in Pro',
     ],
-    cta: 'Upgrade to Scale',
   },
 ];
 

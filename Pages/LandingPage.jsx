@@ -322,7 +322,7 @@ function Pricing({ go }) {
           {PLANS.map((plan) => (
             <article
               key={plan.name}
-              className={`relative flex flex-col rounded-xl border p-6 transition-all ${
+              className={`pricing-plan-card relative flex flex-col rounded-xl border p-6 transition-all ${
                 plan.highlight
                   ? 'border-slate-900 bg-slate-900 text-white shadow-xl shadow-slate-300 lg:-mt-3 lg:mb-3'
                   : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'
@@ -368,20 +368,6 @@ function Pricing({ go }) {
                   );
                 })}
               </ul>
-              <button
-                onClick={() => !plan.current && go('/console')}
-                disabled={plan.current}
-                aria-disabled={plan.current ? 'true' : undefined}
-                className={`mt-6 w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
-                  plan.current
-                    ? 'bg-slate-100 text-slate-500'
-                    : plan.highlight
-                      ? 'bg-white text-slate-900 hover:bg-slate-100'
-                      : 'bg-slate-900 text-white hover:bg-slate-800'
-                }`}
-              >
-                {plan.cta}
-              </button>
             </article>
           ))}
         </div>
