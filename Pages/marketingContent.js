@@ -75,7 +75,7 @@ export const FEATURES = [
     icon: Zap,
     title: 'Latency-Aware Proxy',
     text:
-      'Transparently proxy to OpenAI, Anthropic, and others with millisecond overhead and automatic failover.',
+      'Transparently proxy to OpenAI, Anthropic, and others with about 10–20ms overhead and automatic failover.',
   },
 ];
 
@@ -144,10 +144,10 @@ export const PLANS = [
 ];
 
 export const METRICS = [
-  { value: '<5ms', label: 'Proxy overhead per request' },
+  { value: '~10–20ms', label: 'Proxy overhead per request' },
   { value: '1.2B+', label: 'Tokens governed monthly' },
   { value: '99.98%', label: 'Gateway uptime over 90 days' },
-  { value: '40+', label: 'Upstream providers supported' },
+  { value: '8', label: 'Upstream providers supported' },
 ];
 
 export const STEPS = [
@@ -156,7 +156,7 @@ export const STEPS = [
     icon: KeyRound,
     title: 'Import a master key',
     text:
-      'Connect an upstream provider key once — OpenAI, Anthropic, Mistral, Google Vertex, and 40 more are supported out of the box.',
+      'Connect an upstream provider key once — OpenAI, Anthropic, Google Vertex, Mistral, Cohere, Together AI, Groq, and Perplexity are supported out of the box.',
   },
   {
     number: '02',

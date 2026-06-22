@@ -6,7 +6,6 @@ import {
   Sparkles,
   Star,
   Lock,
-  Github,
   Zap,
   Globe,
 } from './icons';
@@ -21,6 +20,7 @@ import {
   FAQS,
 } from './marketingContent';
 
+const LANDING_SECTION_CLASS = 'border-y border-slate-200 bg-gradient-to-b from-white to-slate-50';
 
 export default function LandingPage() {
   const go = (path) => { window.history.pushState({}, '', path); window.dispatchEvent(new Event('popstate')); };
@@ -132,7 +132,7 @@ function HeroCard() {
 
 function Logos() {
   return (
-    <section className="border-y border-slate-200 bg-white py-8">
+    <section className={`${LANDING_SECTION_CLASS} py-8`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p className="mb-6 text-center text-xs font-semibold uppercase tracking-widest text-slate-500">
           Works with your existing providers
@@ -153,7 +153,7 @@ function Logos() {
 
 function MetricsBar() {
   return (
-    <section className="border-b border-slate-200 bg-slate-50 py-12">
+    <section className={`${LANDING_SECTION_CLASS} py-12`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
           {METRICS.map((m) => (
@@ -182,7 +182,7 @@ function SectionHeader({ eyebrow, title, subtitle }) {
 
 function Features() {
   return (
-    <section id="features" className="bg-white py-20 sm:py-28">
+    <section id="features" className={`${LANDING_SECTION_CLASS} py-20 sm:py-28`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Capabilities"
@@ -213,7 +213,7 @@ function Features() {
 
 function HowItWorks() {
   return (
-    <section className="bg-slate-50 py-20 sm:py-28">
+    <section className={`${LANDING_SECTION_CLASS} py-20 sm:py-28`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="How it works"
@@ -267,7 +267,7 @@ function Pricing({ go }) {
   };
 
   return (
-    <section id="pricing" className="bg-white py-20 sm:py-28">
+    <section id="pricing" className={`${LANDING_SECTION_CLASS} py-20 sm:py-28`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Pricing"
@@ -342,7 +342,7 @@ function Pricing({ go }) {
 
 function Testimonials() {
   return (
-    <section className="border-y border-slate-200 bg-slate-50 py-20 sm:py-28">
+    <section className={`${LANDING_SECTION_CLASS} py-20 sm:py-28`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader eyebrow="Customers" title="Teams ship API access with confidence" />
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -382,7 +382,7 @@ function Testimonials() {
 function Faq() {
   const [open, setOpen] = useState(0);
   return (
-    <section id="faq" className="bg-white py-20 sm:py-28">
+    <section id="faq" className={`${LANDING_SECTION_CLASS} py-20 sm:py-28`}>
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
         <div className="mt-12 divide-y divide-slate-200 rounded-xl border border-slate-200">
@@ -430,7 +430,7 @@ function Faq() {
 
 function CtaBand({ go }) {
   return (
-    <section className="bg-slate-50 py-16">
+    <section className={`${LANDING_SECTION_CLASS} py-16`}>
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-2xl bg-slate-900 px-8 py-12 text-center shadow-xl sm:px-16 sm:py-16">
           <div
@@ -473,9 +473,6 @@ function CtaBand({ go }) {
               </span>
               <span className="flex items-center gap-1.5">
                 <Globe className="h-3.5 w-3.5" /> International payments via Razorpay
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Github className="h-3.5 w-3.5" /> Open about how it works
               </span>
             </div>
           </div>
