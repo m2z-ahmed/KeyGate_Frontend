@@ -3,7 +3,6 @@ import {
   ArrowRight,
   Check,
   ChevronDown,
-  Shield,
   Sparkles,
   Star,
   Lock,
@@ -120,55 +119,12 @@ function HeroCard() {
     <div className="relative">
       <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sky-200/40 blur-2xl" />
       <div className="absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-emerald-200/40 blur-2xl" />
-      <div className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-300/30">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-white">
-              <Shield className="h-4 w-4" strokeWidth={2.5} />
-            </div>
-            <span className="text-sm font-semibold text-slate-900">Live governance</span>
-          </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Healthy
-          </span>
-        </div>
-        <div className="mt-4 space-y-3">
-          {[
-            ['k_live_openai_•••• 9f3a', 'Production', '3.2M / 5M tokens', 64],
-            ['k_live_anthropic_•••• 1c2b', 'Forge AI', '1.1M / 2M tokens', 55],
-            ['k_live_vertex_•••• 7e44', 'Neura Health', '0.4M / 1M tokens', 40],
-            ['k_live_mistral_•••• 02dd', 'Demo (vendor)', '12k / 50k tokens', 24],
-          ].map(([name, project, usage, pct], i) => (
-            <div key={i} className="rounded-lg border border-slate-100 bg-slate-50/50 p-3">
-              <div className="flex items-center justify-between">
-                <code className="text-[11px] text-slate-700">{name}</code>
-                <span className="text-[11px] font-medium text-slate-500">{project}</span>
-              </div>
-              <div className="mt-2 flex items-center gap-3">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
-                  <div
-                    className="h-full rounded-full bg-slate-900 transition-all duration-700"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <span className="text-[11px] tabular-nums text-slate-600">{usage}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-4 grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 text-center">
-          {[
-            ['1,247', 'requests today'],
-            ['4.7M', 'tokens today'],
-            ['42ms', 'p50 latency'],
-          ].map(([val, label]) => (
-            <div key={label}>
-              <div className="text-lg font-semibold text-slate-900">{val}</div>
-              <div className="text-[11px] text-slate-500">{label}</div>
-            </div>
-          ))}
-        </div>
+      <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-300/30">
+        <img
+          src="/og-image.png"
+          alt="KeyGate product preview"
+          className="h-auto w-full object-cover"
+        />
       </div>
     </div>
   );
