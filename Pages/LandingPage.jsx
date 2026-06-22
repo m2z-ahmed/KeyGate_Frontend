@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ArrowRight,
   Check,
@@ -81,7 +81,7 @@ function Hero({ go }) {
                 onClick={() => go('/console')}
                 className="group inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-slate-800 hover:shadow-lg"
               >
-                Get Started
+                Get started
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
               <button
@@ -115,6 +115,14 @@ function Hero({ go }) {
 }
 
 function HeroCard() {
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = '/og-image.png';
+    document.head.appendChild(link);
+  }, []);
+
   return (
     <div className="relative">
       <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-sky-200/40 blur-2xl" />
@@ -457,7 +465,7 @@ function CtaBand({ go }) {
                 onClick={() => go('/console')}
                 className="group inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-medium text-slate-900 transition-all hover:bg-slate-100"
               >
-                Get Started
+                Get started
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
               <button
