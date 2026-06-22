@@ -2409,7 +2409,7 @@ kbd{
 .public-page .border-b,
 .public-page .border-l-2,
 .public-page .border-t {
-  border-style: solid;
+  /* border-style: solid; */
 }
 .public-page .bg-slate-900,
 .public-page .bg-white,
@@ -2429,3 +2429,68 @@ kbd{
   outline-offset: 2px;
 }
 /* ── End public page button/menu normalization ── */
+
+
+/* ── Public footer links ── */
+.public-footer-link {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #cbd5e1;
+  padding: 6px 8px;
+  text-align: left;
+  line-height: 1.35;
+  transition: background-color .18s ease, color .18s ease, transform .18s ease;
+}
+.public-footer-link:hover {
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  transform: translateX(2px);
+}
+.public-footer-link--legal {
+  color: #94a3b8;
+}
+.public-footer-link--legal:hover {
+  color: #fff;
+}
+
+/* ── Fair usage tooltip ── */
+.fair-usage-tooltip {
+  position: relative;
+  cursor: help;
+  text-decoration: underline dotted currentColor;
+  text-underline-offset: 3px;
+}
+.fair-usage-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  z-index: 60;
+  width: max-content;
+  max-width: 220px;
+  border-radius: 8px;
+  background: #020617;
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(2,6,23,.28);
+  font-size: 12px;
+  line-height: 1.25;
+  opacity: 0;
+  padding: 7px 9px;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity .18s ease, transform .18s ease;
+  white-space: nowrap;
+}
+.fair-usage-tooltip:hover::after,
+.fair-usage-tooltip:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* ── End public footer links and fair usage tooltip ── */
+.public-page button:disabled {
+  cursor: default;
+}

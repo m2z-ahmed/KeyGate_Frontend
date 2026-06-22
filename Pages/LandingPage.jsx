@@ -293,13 +293,30 @@ function HowItWorks() {
 }
 
 function Pricing({ go }) {
+  const renderFeature = (feature, highlighted) => {
+    const text = typeof feature === 'string' ? feature : feature.text;
+    const tooltip = typeof feature === 'string' ? '' : feature.tooltip;
+
+    return (
+      <span className={highlighted ? 'text-slate-200' : 'text-slate-700'}>
+        {tooltip ? (
+          <span className="fair-usage-tooltip" data-tooltip={tooltip} tabIndex={0}>
+            {text}
+          </span>
+        ) : (
+          text
+        )}
+      </span>
+    );
+  };
+
   return (
     <section id="pricing" className="bg-white py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Pricing"
           title="Simple, subscription-based pricing"
-          subtitle="Pricing is billed per month or per year. Payments are processed by Razorpay and support international cards where available."
+          subtitle="Pricing is billed monthly. INR plan charges are processed securely via Razorpay."
         />
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {PLANS.map((plan) => (
@@ -314,7 +331,7 @@ function Pricing({ go }) {
               {plan.highlight && (
                 <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-amber-400 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-900">
                   <Star className="h-3 w-3 fill-current" />
-                  Popular
+                  {plan.badge || 'Most Popular'}
                 </span>
               )}
               <h3
@@ -324,33 +341,43 @@ function Pricing({ go }) {
               >
                 {plan.name}
               </h3>
-              <div className="mt-3 flex items-baseline gap-1">
+              <p className={`mt-3 text-sm leading-relaxed ${plan.highlight ? 'text-slate-300' : 'text-slate-600'}`}>
+                {plan.text}
+              </p>
+              <div className="mt-6 flex items-baseline gap-1">
                 <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
                 <span className={`text-sm ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>
                   {plan.cadence}
                 </span>
               </div>
-              <p className={`mt-3 text-sm leading-relaxed ${plan.highlight ? 'text-slate-300' : 'text-slate-600'}`}>
-                {plan.text}
+              <p className={`mt-2 text-xs ${plan.highlight ? 'text-slate-400' : 'text-slate-500'}`}>
+                {plan.note}
               </p>
               <ul className="mt-6 flex-1 space-y-3 text-sm">
-                {plan.features.map((feat) => (
-                  <li key={feat} className="flex items-start gap-2">
-                    <Check
-                      className={`mt-0.5 h-4 w-4 shrink-0 ${
-                        plan.highlight ? 'text-emerald-400' : 'text-emerald-500'
-                      }`}
-                    />
-                    <span className={plan.highlight ? 'text-slate-200' : 'text-slate-700'}>{feat}</span>
-                  </li>
-                ))}
+                {plan.features.map((feat) => {
+                  const key = typeof feat === 'string' ? feat : feat.text;
+                  return (
+                    <li key={key} className="flex items-start gap-2">
+                      <Check
+                        className={`mt-0.5 h-4 w-4 shrink-0 ${
+                          plan.highlight ? 'text-emerald-400' : 'text-emerald-500'
+                        }`}
+                      />
+                      {renderFeature(feat, plan.highlight)}
+                    </li>
+                  );
+                })}
               </ul>
               <button
-                onClick={() => go('/console')}
+                onClick={() => !plan.current && go('/console')}
+                disabled={plan.current}
+                aria-disabled={plan.current ? 'true' : undefined}
                 className={`mt-6 w-full rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
-                  plan.highlight
-                    ? 'bg-white text-slate-900 hover:bg-slate-100'
-                    : 'bg-slate-900 text-white hover:bg-slate-800'
+                  plan.current
+                    ? 'bg-slate-100 text-slate-500'
+                    : plan.highlight
+                      ? 'bg-white text-slate-900 hover:bg-slate-100'
+                      : 'bg-slate-900 text-white hover:bg-slate-800'
                 }`}
               >
                 {plan.cta}
@@ -361,7 +388,7 @@ function Pricing({ go }) {
         <p className="mt-8 text-center text-xs text-slate-500">
           All plans include instant revocation, audit-ready logs, and encrypted master keys. Need a
           private deployment or custom terms?{' '}
-          <button onClick={() => go('/contact')} className="font-medium text-slate-700 underline-offset-2 hover:underline">
+          <button onClick={() => (window.location.href = 'mailto:support@lethem.app')} className="font-medium text-slate-700 underline-offset-2 hover:underline">
             Talk to us
           </button>
           .

@@ -177,7 +177,7 @@ export default function PublicLayout({ children, compact = false }) {
                   <li key={link.href}>
                     <button
                       onClick={() => go(link.href)}
-                      className="text-slate-400 transition-colors hover:text-white"
+                      className="public-footer-link public-footer-link--product"
                     >
                       {link.label}
                     </button>
@@ -186,7 +186,7 @@ export default function PublicLayout({ children, compact = false }) {
                 <li>
                   <button
                     onClick={() => go('/console')}
-                    className="text-slate-400 transition-colors hover:text-white"
+                    className="public-footer-link public-footer-link--product"
                   >
                     Open console
                   </button>
@@ -201,7 +201,7 @@ export default function PublicLayout({ children, compact = false }) {
                   <li key={link.href}>
                     <button
                       onClick={() => go(link.href)}
-                      className="text-left text-slate-400 transition-colors hover:text-white"
+                      className="public-footer-link public-footer-link--legal"
                     >
                       {link.label}
                     </button>
