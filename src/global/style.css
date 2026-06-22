@@ -2616,3 +2616,52 @@ kbd{
   color: inherit;
 }
 /* ── End public marketing/legal dark theme ── */
+
+/* ── Public dark theme button/background fixes ── */
+.public-page button:not(.bg-slate-900):not(.bg-white):not(.bg-white\/5):not(.bg-white\/10):not(.bg-white\/60):not(.bg-white\/85):not(.bg-slate-50):not(.bg-slate-100):not(.bg-emerald-50):not(.bg-amber-400) {
+  background: transparent;
+}
+.public-page .bg-slate-900 {
+  background-color: #111827;
+}
+.public-page .bg-slate-900.text-white,
+.public-page .bg-slate-900 .text-white,
+.public-page .bg-slate-900 .text-slate-300,
+.public-page .bg-slate-900 .text-slate-400 {
+  color: #f8fafc;
+}
+.public-page .bg-white,
+.public-page button.bg-white,
+.public-page .bg-white\/60,
+.public-page .bg-white\/85,
+.public-page button.bg-white\/60,
+.public-page button.bg-white\/85 {
+  background-color: rgba(15, 20, 38, .9);
+  color: #f8fafc;
+}
+.public-page .bg-white\/5,
+.public-page .bg-white\/10 {
+  background-color: rgba(255,255,255,.08);
+}
+.public-page .bg-slate-50,
+.public-page button.bg-slate-50,
+.public-page .bg-slate-100,
+.public-page button.bg-slate-100 {
+  background-color: rgba(255,255,255,.06);
+  color: #f8fafc;
+}
+.public-page .bg-emerald-50 {
+  color: #6ee7b7;
+}
+.public-page .hover\:bg-slate-50:hover,
+.public-page .hover\:bg-slate-100:hover,
+.public-page button.hover\:bg-slate-50:hover,
+.public-page button.hover\:bg-slate-100:hover {
+  background-color: rgba(255,255,255,.1);
+}
+.public-page .fair-usage-tooltip::after {
+  background: #020617;
+  color: #f8fafc;
+  border: 1px solid rgba(148,163,184,.2);
+}
+/* ── End public dark theme button/background fixes ── */
