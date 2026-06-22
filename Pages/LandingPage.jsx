@@ -81,7 +81,7 @@ function Hero({ go }) {
                 onClick={() => go('/console')}
                 className="group inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-slate-800 hover:shadow-lg"
               >
-                Launch console
+                Get Started
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
               <button
@@ -457,7 +457,7 @@ function CtaBand({ go }) {
                 onClick={() => go('/console')}
                 className="group inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-medium text-slate-900 transition-all hover:bg-slate-100"
               >
-                Launch console
+                Get Started
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
               <button

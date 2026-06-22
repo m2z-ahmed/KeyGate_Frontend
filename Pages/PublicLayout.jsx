@@ -80,7 +80,7 @@ export default function PublicLayout({ children, compact = false }) {
               onClick={() => go('/console')}
               className="group flex items-center gap-1 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-slate-800 hover:shadow-md"
             >
-              Open console
+              Get Started
               <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
           </div>
@@ -123,7 +123,7 @@ export default function PublicLayout({ children, compact = false }) {
               onClick={() => go('/console')}
               className="mt-2 block w-full rounded-md bg-slate-900 px-3 py-2 text-center text-base font-medium text-white"
             >
-              Open console
+              Get Started
             </button>
           </div>
         </div>
@@ -188,7 +188,7 @@ export default function PublicLayout({ children, compact = false }) {
                     onClick={() => go('/console')}
                     className="public-footer-link public-footer-link--product"
                   >
-                    Open console
+                    Get Started
                   </button>
                 </li>
               </ul>
