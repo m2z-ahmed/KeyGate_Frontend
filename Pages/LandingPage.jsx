@@ -47,16 +47,16 @@ function Hero({ go }) {
       <div
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          backgroundColor: '#f8fafc',
+          backgroundColor: '#070914',
           backgroundImage:
-            'radial-gradient(circle at 20% 0%, rgba(15,23,42,0.06), transparent 40%), radial-gradient(circle at 80% 10%, rgba(56,189,248,0.10), transparent 35%)',
+            'radial-gradient(circle at 20% 0%, rgba(124,107,255,0.24), transparent 42%), radial-gradient(circle at 80% 10%, rgba(56,189,248,0.18), transparent 36%)',
         }}
       />
       <div
         className="pointer-events-none absolute inset-0 -z-10 opacity-[0.35]"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(15,23,42,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.05) 1px, transparent 1px)',
+            'linear-gradient(rgba(148,163,184,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.08) 1px, transparent 1px)',
           backgroundSize: '64px 64px',
           maskImage: 'radial-gradient(ellipse at top, black 30%, transparent 70%)',
         }}
