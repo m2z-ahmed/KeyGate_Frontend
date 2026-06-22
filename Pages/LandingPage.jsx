@@ -23,7 +23,20 @@ import {
 const LANDING_SECTION_CLASS = 'border-y border-slate-200 bg-gradient-to-b from-white to-slate-50';
 
 export default function LandingPage() {
-  const go = (path) => { window.history.pushState({}, '', path); window.dispatchEvent(new Event('popstate')); };
+  const go = (path) => {
+    // Handle hash-based navigation with smooth scroll
+    if (path.startsWith('/#')) {
+      const id = path.slice(2);
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return;
+    }
+    // Handle regular navigation
+    window.history.pushState({}, '', path);
+    window.dispatchEvent(new Event('popstate'));
+  };
 
   return (
     <PublicLayout>
