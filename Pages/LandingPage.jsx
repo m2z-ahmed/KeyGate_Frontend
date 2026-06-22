@@ -493,7 +493,7 @@ function CtaBand({ go }) {
               </button>
               <button
                 onClick={() => go('/terms-and-conditions')}
-                className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-white/5"
+                className="inline-flex items-center gap-2 rounded-lg border border-white bg-white px-5 py-3 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-100"
               >
                 View policies
               </button>

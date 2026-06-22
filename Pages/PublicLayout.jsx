@@ -37,7 +37,7 @@ export default function PublicLayout({ children, compact = false }) {
   }, [mobileOpen]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 antialiased">
+    <div className="public-page min-h-screen bg-slate-50 text-slate-900 antialiased">
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           scrolled
