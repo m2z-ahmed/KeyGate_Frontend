@@ -120,7 +120,7 @@ function BootLoader({ go, view, projectSlug, onBootComplete }: { go: (p: string)
 export default function App() {
   const routeState = useConsoleRouteState();
   const { projectSlug, page, isPublicHealth } = routeState;
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const [booted, setBooted] = useState(false);
 
   useEffect(() => { setBooted(false); }, [isAuthenticated]);
@@ -138,7 +138,7 @@ export default function App() {
   if (!isAuthenticated) return <LoginView />;
 
   return (
-    <AppProvider projectSlug={projectSlug} page={page}>
+    <AppProvider key={user?.sub || 'anon'} projectSlug={projectSlug} page={page}>
       {!booted && <BootLoader go={routeState.go} view={routeState.view} projectSlug={projectSlug} onBootComplete={() => setBooted(true)} />}
       {booted ? <AppRouter routeState={routeState} /> : <BootSplash />}
     </AppProvider>

@@ -63,10 +63,26 @@ interface ApiOptions {
 }
 
 const CTX = createContext<AppContextValue | null>(null);
+const DEFAULT_CTX: AppContextValue = {
+  API: '', providers: [], loadProviders: async () => [],
+  api: async () => { throw new Error('Not initialized'); },
+  notify: () => {}, copyText: async () => {}, modal: '', setModal: () => {},
+  revealedToken: '', setRevealedToken: () => {},
+  loadMasterKeys: async () => {}, loadSubkeys: async () => {}, loadLogs: async () => {},
+  loadOverview: async () => {}, loadBilling: async () => ({} as Billing), loadProjects: async () => [],
+  createProject: async () => null, deleteProject: async () => undefined,
+  subkeys: [], setSubkeys: () => {}, masterKeys: [], logs: [], analytics: { totalRequests: 0, totalTokens: 0, avgLatency: '—' },
+  billing: null, setBilling: () => {}, loading: {}, copiedItem: '',
+  projects: [], projectSearch: '', setProjectSearch: () => {}, filteredProjects: [], selectedProject: undefined,
+  projectToDelete: null, setProjectToDelete: () => {}, deleteConfirm: '', setDeleteConfirm: () => {},
+  notif: { show: false, msg: '', type: 'success' },
+  fmtNum: (n: number) => String(n || 0), fmtTime: () => '—', fmtDate: () => '—',
+  quotaColor: () => 'ok' as const, sleep: async () => {},
+};
+
 export const useApp = () => {
   const ctx = useContext(CTX);
-  if (!ctx) throw new Error('useApp must be used within AppProvider');
-  return ctx;
+  return ctx || DEFAULT_CTX;
 };
 
 export function AppProvider({ children, projectSlug, page }: { children: ReactNode; projectSlug: string; page: string }) {
