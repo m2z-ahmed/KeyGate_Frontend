@@ -16,3 +16,6 @@
 @media (max-width:760px){.receipt-backdrop{padding:14px 8px 28px}.receipt-preview-grid{grid-template-columns:1fr}.receipt-preview-top{flex-direction:column}.subkey-actions{flex-direction:column;align-items:stretch}}
 
 @media (max-height:760px){.receipt-backdrop{align-items:flex-start}}
+
+.page.active .receipt-backdrop{position:absolute!important;inset:0!important;align-items:center!important;justify-content:center!important;width:100%!important;min-height:100%!important;padding:18px!important}.page.active .receipt-backdrop .receipt-modal{width:min(720px,calc(100% - 32px))!important;max-width:720px!important}
+@media (max-height:760px){.page.active .receipt-backdrop{align-items:flex-start!important}}

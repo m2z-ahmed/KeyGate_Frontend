@@ -43,7 +43,7 @@ export default function OverviewPage({ ctx, navigate }) {
         </div>}
     </div>
 
-    <div className='card graph-card'><div className='card-header'><div><div className='card-title'>Usage graph</div><div className='card-sub'>Proxy requests trend</div></div><div className='timeframe'><button className='btn btn-ghost btn-sm'>24H</button><button className='btn btn-ghost btn-sm'>7D</button><button className='btn btn-ghost btn-sm'>30D</button></div></div>
+    <div className='card graph-card'><div className='card-header'><div><div className='card-title'>Usage graph</div><div className='card-sub'>Proxy requests trend</div></div></div>
       {isLoading ? <SkelGraph /> : <div className='graph-frame' style={{ display: 'flex', alignItems: 'end', gap: '4px', height: '70px' }}>{logs.slice(0, 30).reverse().map((l, i) => <div key={i} title={`${l.subkey_name || '—'} | ${l.model || '—'} | ${fmtNum(l.tokens_used)} tokens | ${l.status}`} style={{ width: '8px', height: `${Math.max(8, Math.min(64, (l.tokens_used || 1) / 20))}px`, background: 'var(--accent)', opacity: .8, borderRadius: '2px' }} />)}</div>}
     </div>
 
