@@ -228,7 +228,8 @@ export default function LethemProvider({ children, projectSlug, page }) {
     api, notify, copyText, modal, setModal, revealedToken, setRevealedToken,
     loadMasterKeys, loadSubkeys, loadLogs, loadOverview, loadBilling,
     subkeys, setSubkeys, masterKeys, logs, analytics, billing, setBilling, page, loading, copiedItem,
-  }), [modal, subkeys, masterKeys, logs, analytics, billing, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub]);
+    selectedProject: projects.find((p) => p.slug === projectSlug || p.id === projectSlug),
+  }), [modal, subkeys, masterKeys, logs, analytics, billing, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub, projects]);
 
   const value = useMemo(() => ({
     ctx,
