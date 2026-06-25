@@ -1,4 +1,4 @@
-const comingSoonPages = new Set(['members', 'roles', 'invites', 'general', 'endpoint', 'security', 'audit']);
+const comingSoonPages = new Set(['members', 'roles', 'invites', 'general', 'security', 'audit']);
 
 const pageCopy = {
   analytics: {
