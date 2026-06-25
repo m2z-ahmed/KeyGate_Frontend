@@ -1,3 +1,5 @@
+const comingSoonPages = new Set(['members', 'roles', 'invites', 'general', 'endpoint', 'security', 'audit']);
+
 const pageCopy = {
   analytics: {
     title: 'Analytics',
@@ -92,27 +94,38 @@ const pageCopy = {
 
 export default function PlaceholderPage({ type = 'general', onBack = null }) {
   const data = pageCopy[type] || pageCopy.general;
+  const isComingSoon = comingSoonPages.has(type);
+
   return (
-    <section className='page active'>
+    <section className={`page active ${isComingSoon ? 'coming-soon-page' : ''}`}>
       {onBack && <button className='btn btn-ghost btn-sm account-back-btn' onClick={onBack}>← Back to previous page</button>}
-      <div className='page-header'>
-        <h1 className='page-title'>{data.title}</h1>
-        <p className='page-sub'>{data.sub}</p>
+      <div className={isComingSoon ? 'coming-soon-blur' : undefined} aria-hidden={isComingSoon ? 'true' : undefined}>
+        <div className='page-header'>
+          <h1 className='page-title'>{data.title}</h1>
+          <p className='page-sub'>{data.sub}</p>
+        </div>
+        <div className='card future-hero'>
+          <span className='badge active'>{data.status}</span>
+          <h2>{data.title} is ready for product wiring</h2>
+          <p>These preview screens reserve the final information architecture so billing, teams, organizations, and settings can be connected without reshuffling navigation later.</p>
+        </div>
+        <div className='future-grid'>
+          {data.cards.map(([label, value, helper]) => (
+            <div className='stat future-stat' key={label}>
+              <div className='stat-label'>{label}</div>
+              <div className='stat-val'>{value}</div>
+              <div className='stat-trend'>{helper}</div>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className='card future-hero'>
-        <span className='badge active'>{data.status}</span>
-        <h2>{data.title} is ready for product wiring</h2>
-        <p>These preview screens reserve the final information architecture so billing, teams, organizations, and settings can be connected without reshuffling navigation later.</p>
-      </div>
-      <div className='future-grid'>
-        {data.cards.map(([label, value, helper]) => (
-          <div className='stat future-stat' key={label}>
-            <div className='stat-label'>{label}</div>
-            <div className='stat-val'>{value}</div>
-            <div className='stat-trend'>{helper}</div>
-          </div>
-        ))}
-      </div>
+      {isComingSoon && (
+        <div className='coming-soon-overlay' role='status' aria-live='polite'>
+          <span className='badge active'>Coming Soon</span>
+          <h2>Coming Soon</h2>
+          <p>We&apos;ll add this page soon. It will be available in a future update.</p>
+        </div>
+      )}
     </section>
   );
 }
