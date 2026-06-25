@@ -2670,3 +2670,15 @@ kbd{
   border: 1px solid rgba(148,163,184,.2);
 }
 /* ── End public dark theme button/background fixes ── */
+
+/* Account pages reuse the console sidebar width and keep the user menu compact. */
+.app.account-mode{grid-template-columns:var(--console-sidebar-width) minmax(0,1fr)!important}
+.app.account-mode .main{grid-column:2!important;max-width:none!important;margin:0!important;width:100%!important}
+.account-sidebar{grid-column:1;grid-row:2;width:var(--console-sidebar-width)}
+.user-menu-panel-overlay,.user-menu-panel-overlay.open{max-height:none!important;overflow:visible!important}
+
+/* Clickable log source filters. */
+.source-filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.source-filter-chip{display:inline-flex;align-items:center;border:1px solid rgba(45,202,114,.32);border-radius:999px;background:rgba(45,202,114,.13);color:#b8ffd0;font:inherit;font-size:12px;font-weight:700;padding:6px 10px;cursor:pointer;transition:background .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease}
+.source-filter-chip:hover{border-color:rgba(124,107,255,.55);color:#d9d4ff}
+.source-filter-chip.selected{border-color:rgba(124,107,255,.86);background:rgba(124,107,255,.22);color:#fff;box-shadow:0 8px 24px rgba(124,107,255,.14)}

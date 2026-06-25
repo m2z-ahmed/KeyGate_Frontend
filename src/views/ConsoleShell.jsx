@@ -16,6 +16,30 @@ import DangerPage from '../components/pages/DangerPage';
 
 const PLACEHOLDER_PAGES = new Set(['members', 'roles', 'invites', 'invoices', 'general', 'endpoint', 'security', 'audit', 'profile', 'workspace', 'docs']);
 
+
+function AccountSidebar({ page, navigate, onBack }) {
+  const items = [
+    ['profile', 'Profile'],
+    ['workspace', 'Workspace Settings'],
+    ['subscription', 'Billing'],
+    ['docs', 'Documentation'],
+  ];
+
+  return (
+    <aside className='sidebar account-sidebar'>
+      <nav className='nav'>
+        <button className='nav-item' onClick={onBack}>← Back to console</button>
+        <div className='nav-section'>
+          <div className='nav-label'>Account</div>
+          {items.map(([key, label]) => (
+            <button key={key} className={`nav-item ${page === key || (page === 'billing' && key === 'subscription') ? 'active' : ''}`} onClick={() => navigate(key)}>{label}</button>
+          ))}
+        </div>
+      </nav>
+    </aside>
+  );
+}
+
 const PAGES = {
   overview: OverviewPage,
   masterkeys: MasterKeysPage,
@@ -60,23 +84,27 @@ export default function ConsoleShell({ go, page, projectSlug, accountMode = fals
           mobileMenuOpen={mobileMenuOpen}
           navigate={navigate}
         />
-        {!accountMode && <Sidebar
-          page={page}
-          navigate={navigate}
-          onBackToConsole={() => go('/console')}
-          drawerOpen={mobileMenuOpen}
-          setDrawerOpen={setMobileMenuOpen}
-        />}
+        {accountMode ? (
+          <AccountSidebar page={page} navigate={navigate} onBack={goAccountBack} />
+        ) : (
+          <Sidebar
+            page={page}
+            navigate={navigate}
+            onBackToConsole={() => go('/console')}
+            drawerOpen={mobileMenuOpen}
+            setDrawerOpen={setMobileMenuOpen}
+          />
+        )}
         <main className='main'>
           <div key={page} className='page-transition'>
             {PLACEHOLDER_PAGES.has(page) ? (
-              <PlaceholderPage type={page} onBack={accountMode ? goAccountBack : null} />
+              <PlaceholderPage type={page} />
             ) : PageComponent && (
               page === 'overview'
                 ? <OverviewPage navigate={navigate} ctx={ctx} />
                 : page === 'usage' ? <UsagePage ctx={{ ...ctx, projects }} billing={ctx.billing} />
                 : page === 'danger' ? <DangerPage ctx={ctx} selectedProject={selectedProject} deleteProject={deleteProject} setProjectToDelete={setProjectToDelete} />
-                : <PageComponent ctx={ctx} onBack={accountMode ? goAccountBack : null} />
+                : <PageComponent ctx={ctx} onBack={accountMode ? null : goAccountBack} />
             )}
           </div>
         </main>
