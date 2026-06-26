@@ -204,8 +204,16 @@ export default function ProjectSelectView({ go }) {
 
         {!hideOnboarding && (
           <section className='project-console-onboarding card'>
-            <button type='button' className='onboarding-close' onClick={dismissOnboarding} aria-label='Hide getting started'>✕</button>
-            <div className='project-console-section-head'><div><strong>✣ Getting Started</strong><span>Complete these steps to get your API gateway running</span></div><b>{completedSteps}/{onboardingSteps.length}<small>Completed</small></b></div>
+            <div className='project-console-section-head'>
+              <div>
+                <strong>✣ Getting Started</strong>
+                <span>Complete these steps to get your API gateway running</span>
+              </div>
+              <div className='project-console-section-meta'>
+                <b>{completedSteps}/{onboardingSteps.length}<small>Completed</small></b>
+                <button type='button' className='onboarding-close' onClick={dismissOnboarding} aria-label='Hide getting started'>✕</button>
+              </div>
+            </div>
             <div className='project-console-progress'><span style={{ width: `${onboardingPercent}%` }} /></div>
             <div className='project-console-steps'>{onboardingSteps.map((step) => { const StepTag = step.onClick ? 'button' : 'div'; return <StepTag type={step.onClick ? 'button' : undefined} className={`${step.done ? 'done' : ''} ${step.onClick ? 'clickable' : 'locked'}`} onClick={step.onClick} key={step.label}><IconCheck />{step.label}</StepTag>; })}</div>
           </section>
