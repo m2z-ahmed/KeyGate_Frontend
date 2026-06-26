@@ -24,8 +24,8 @@ export default function ConsoleHeader({ page, selectedProject, projectSlug, onSw
     window.history.pushState({ from }, '', `/console/${target}`);
     window.dispatchEvent(new Event('popstate'));
   };
-  const userLabel = user?.email || user?.name || 'Signed in';
-  const avatar = (user?.email || user?.name || selectedProject?.name || 'K').charAt(0).toUpperCase();
+  const userLabel = user?.name || user?.email || 'Signed in';
+  const avatar = (user?.name || user?.email || selectedProject?.name || 'K').charAt(0).toUpperCase();
 
   const updateMenuPosition = () => {
     const rect = userMenuButtonRef.current?.getBoundingClientRect();

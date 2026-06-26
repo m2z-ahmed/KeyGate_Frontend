@@ -1,3 +1,5 @@
+import { API_BASE_URL } from '../../lib/config';
+
 const comingSoonPages = new Set(['members', 'roles', 'invites', 'general', 'security', 'audit']);
 
 const pageCopy = {
@@ -52,7 +54,7 @@ const pageCopy = {
     title: 'API Endpoint',
     sub: 'Configure proxy endpoints, environments, and SDK connection details.',
     status: 'Settings preview',
-    cards: [['Proxy endpoint', 'lethem-backend.onrender.com', 'Production gateway'], ['Environment', 'Production', 'Live traffic enabled'], ['SDK status', 'Ready', 'Use this endpoint in clients']],
+    cards: [['Proxy endpoint', API_BASE_URL, 'Production gateway'], ['Environment', 'Production', 'Live traffic enabled'], ['SDK status', 'Ready', 'Use this endpoint in clients']],
   },
   security: {
     title: 'Security',

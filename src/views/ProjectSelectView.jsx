@@ -17,6 +17,9 @@ export default function ProjectSelectView({ go }) {
   const { user, logout, getAccessToken, isAuthenticated } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [accountUsage, setAccountUsage] = useState({ subkeys: 0, masterKeys: 0, tokens: 0, requests: 0, loading: false });
+  const onboardingCacheScope = user?.sub || 'anonymous';
+  const onboardingDismissedKey = '/console-page/getting-started-dismissed';
+  const [hideOnboarding, setHideOnboarding] = useState(() => Boolean(cacheGet(onboardingDismissedKey, onboardingCacheScope)));
 
   const currentPlan = billing?.plans?.find((plan) => plan.id === billing.currentPlan) || billing?.plans?.find((plan) => plan.id === 'free');
   const limits = currentPlan?.limits || {};
@@ -33,7 +36,7 @@ export default function ProjectSelectView({ go }) {
   const tokenUsage = Math.max(accountUsage.tokens, analytics?.totalTokens || 0);
   const requestCount = Math.max(accountUsage.requests, analytics?.totalRequests || 0, analytics?.logs?.length || 0);
   const isAtProjectLimit = projectLimit != null && projects.length >= projectLimit;
-  const userLabel = user?.email || user?.name || 'obito@keygate.dev';
+  const userLabel = user?.name || user?.email || 'Signed in';
   const avatar = userLabel.charAt(0).toUpperCase();
 
 
@@ -132,17 +135,28 @@ export default function ProjectSelectView({ go }) {
   const completedSteps = onboardingSteps.filter((step) => step.done).length;
   const onboardingPercent = (completedSteps / onboardingSteps.length) * 100;
 
-  const usageCards = [
-    { label: 'Projects', value: `${projects.length} / ${projectLimitLabel}`, icon: '▣' },
-    { label: 'Subkeys', value: `${fmtNum(displayedSubkeys)} / ${subkeyLimitLabel}`, icon: '⌘' },
-    { label: 'Token usage', value: `${fmtNum(tokenUsage)} / ${tokenLimitLabel}`, icon: '↯' },
-    { label: 'Current plan', value: currentPlan?.name || 'Free', icon: '▭' },
-  ];
   const planMeters = [
     { label: 'Projects', used: projects.length, limit: projectLimit },
     { label: 'Subkeys', used: displayedSubkeys, limit: subkeyLimit },
     { label: 'Tokens', used: tokenUsage, limit: tokenLimit },
   ];
+
+  useEffect(() => {
+    const cached = Boolean(cacheGet(onboardingDismissedKey, onboardingCacheScope));
+    if (cached) setHideOnboarding(true);
+  }, [onboardingCacheScope]);
+
+  useEffect(() => {
+    if (completedSteps === onboardingSteps.length) {
+      cacheSet(onboardingDismissedKey, true, onboardingCacheScope);
+      setHideOnboarding(true);
+    }
+  }, [completedSteps, onboardingSteps.length, onboardingCacheScope]);
+
+  const dismissOnboarding = () => {
+    cacheSet(onboardingDismissedKey, true, onboardingCacheScope);
+    setHideOnboarding(true);
+  };
 
   const handleDelete = async () => {
     if (!canDeleteProject || !projectToDelete) return;
@@ -188,15 +202,14 @@ export default function ProjectSelectView({ go }) {
           </div>
         </header>
 
-        <section className='project-console-stats'>
-          {usageCards.map((card) => <div className='project-console-stat' key={card.label}><div><span>{card.label}</span><strong>{card.value}</strong></div><i>{card.icon}</i></div>)}
-        </section>
-
-        <section className='project-console-onboarding card'>
-          <div className='project-console-section-head'><div><strong>✣ Getting Started</strong><span>Complete these steps to get your API gateway running</span></div><b>{completedSteps}/{onboardingSteps.length}<small>Completed</small></b></div>
-          <div className='project-console-progress'><span style={{ width: `${onboardingPercent}%` }} /></div>
-          <div className='project-console-steps'>{onboardingSteps.map((step) => { const StepTag = step.onClick ? 'button' : 'div'; return <StepTag type={step.onClick ? 'button' : undefined} className={`${step.done ? 'done' : ''} ${step.onClick ? 'clickable' : 'locked'}`} onClick={step.onClick} key={step.label}><IconCheck />{step.label}</StepTag>; })}</div>
-        </section>
+        {!hideOnboarding && (
+          <section className='project-console-onboarding card'>
+            <button type='button' className='onboarding-close' onClick={dismissOnboarding} aria-label='Hide getting started'>✕</button>
+            <div className='project-console-section-head'><div><strong>✣ Getting Started</strong><span>Complete these steps to get your API gateway running</span></div><b>{completedSteps}/{onboardingSteps.length}<small>Completed</small></b></div>
+            <div className='project-console-progress'><span style={{ width: `${onboardingPercent}%` }} /></div>
+            <div className='project-console-steps'>{onboardingSteps.map((step) => { const StepTag = step.onClick ? 'button' : 'div'; return <StepTag type={step.onClick ? 'button' : undefined} className={`${step.done ? 'done' : ''} ${step.onClick ? 'clickable' : 'locked'}`} onClick={step.onClick} key={step.label}><IconCheck />{step.label}</StepTag>; })}</div>
+          </section>
+        )}
 
         <section className='project-console-actions-wrap'>
           <h2>Quick Actions</h2>

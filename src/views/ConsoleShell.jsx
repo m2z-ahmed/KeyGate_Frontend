@@ -10,12 +10,13 @@ import HealthPage from '../components/pages/HealthPage';
 import NotificationsPage from '../components/pages/NotificationsPage';
 import BillingPage from '../components/pages/BillingPage';
 import ProfilePage from '../components/pages/ProfilePage';
+import WorkspacePage from '../components/pages/WorkspacePage';
 import PlaceholderPage from '../components/pages/PlaceholderPage';
 import AnalyticsPage from '../components/pages/AnalyticsPage';
 import UsagePage from '../components/pages/UsagePage';
 import DangerPage from '../components/pages/DangerPage';
 
-const PLACEHOLDER_PAGES = new Set(['members', 'roles', 'invites', 'invoices', 'general', 'endpoint', 'security', 'audit', 'workspace', 'docs']);
+const PLACEHOLDER_PAGES = new Set(['members', 'roles', 'invites', 'invoices', 'general', 'endpoint', 'security', 'audit', 'docs']);
 
 
 function AccountSidebar({ page, navigate, onBack }) {
@@ -52,6 +53,7 @@ const PAGES = {
   billing: BillingPage,
   subscription: BillingPage,
   profile: ProfilePage,
+  workspace: WorkspacePage,
   analytics: AnalyticsPage,
   usage: UsagePage,
   danger: DangerPage,

@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { cacheGet, cacheSet, cacheBust, setCacheScope } from '../lib/cache';
 import { useAuth } from './AuthContext';
+import { API_BASE_URL } from '../lib/config';
 
 const CTX = createContext(null);
 export const useKeyGate = () => useContext(CTX);
 
-const API = import.meta.env.VITE_API_URL || 'https://keygate-backend.onrender.com';
+const API = API_BASE_URL;
 export const fmtNum = (n) => (n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n || 0));
 export const fmtTime = (ts) => (!ts ? '—' : new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
 export const fmtDate = (ts) => (!ts ? 'Never' : new Date(ts * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }));

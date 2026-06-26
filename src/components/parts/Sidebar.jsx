@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLethem } from '../../contexts/LethemContext';
 import { IconOverview, IconMasterKey, IconSubkey, IconLogs, IconDemo, IconHealth, IconNotifications, IconArrowLeft, IconAnalytics, IconTeam, IconBilling, IconSettings, IconUser } from './Icons';
 
 const sections = [
@@ -19,6 +20,9 @@ const mobileItems = [
 
 export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, setDrawerOpen }) {
   const [collapsed, setCollapsed] = useState(() => ({}));
+  const { ctx } = useLethem();
+  const endpoint = `${ctx.API}/`;
+  const copyEndpoint = () => ctx.copyText(endpoint, 'proxy-endpoint');
   const toggleSection = (label) => setCollapsed((v) => ({ ...v, [label]: !v[label] }));
   const go = (next) => {
     navigate(next);
@@ -42,7 +46,7 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
           </div>
         ))}
       </nav>
-      <div className='sidebar-footer'><div className='api-url-box'><div className='api-url-label'>Proxy endpoint</div><div className='api-url'>https://lethem-backend.onrender.com/</div></div></div>
+      <div className='sidebar-footer'><button type='button' className='api-url-box api-url-button' onClick={copyEndpoint} title='Copy proxy endpoint'><div className='api-url-label'>Proxy endpoint</div><div className='api-url'>{ctx.copiedItem === 'proxy-endpoint' ? 'Copied!' : endpoint}</div></button></div>
     </aside>
 
     <div className={`mobile-drawer-backdrop ${drawerOpen ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setDrawerOpen(false)}>
@@ -56,7 +60,7 @@ export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, s
             </div>
           ))}
         </div>
-        <div className='mobile-drawer-footer'>https://lethem-backend.onrender.com/</div>
+        <button type='button' className='mobile-drawer-footer api-url-button' onClick={copyEndpoint}>{ctx.copiedItem === 'proxy-endpoint' ? 'Copied!' : endpoint}</button>
       </aside>
     </div>
 

@@ -10,6 +10,7 @@ export default function DemoPage({ ctx }) {
   const [selectedSubkeyId, setSelectedSubkeyId] = useState('');
   const [model, setModel] = useState('gpt-4o-mini');
   const [prompt, setPrompt] = useState('Say hello in exactly 5 words.');
+  const endpoint = `${API}/v1/chat/completions`;
   const [consoleLines, setConsoleLines] = useState(['# Lethem live proxy demo', '# Select a subkey and hit "Run test call" to see the magic', 'ready — waiting for request']);
 
   const active = subkeys.filter((s) => s.status === 'active');
@@ -34,9 +35,9 @@ export default function DemoPage({ ctx }) {
   const [copiedSnippet, setCopiedSnippet] = useState('');
   const add = (line) => setConsoleLines((v) => [...v, line]);
 
-  const curlSnippet = `TOKEN="sk-lt-YourTokenHere"\ncurl https://lethem-backend.onrender.com/v1/chat/completions \\\n  -H "Authorization: Bearer $TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"${model}","messages":[{"role":"user","content":"${prompt}"}]}'`;
-  const jsSnippet = `fetch('https://lethem-backend.onrender.com/v1/chat/completions', {\n  method: 'POST',\n  headers: { Authorization: 'Bearer sk-lt-YourTokenHere', 'Content-Type': 'application/json' },\n  body: JSON.stringify({ model: '${model}', messages: [{ role: 'user', content: '${prompt}' }] })\n}).then(r => r.json()).then(console.log);`;
-  const pySnippet = `import requests\nres = requests.post('https://lethem-backend.onrender.com/v1/chat/completions',\n  headers={'Authorization':'Bearer sk-lt-YourTokenHere','Content-Type':'application/json'},\n  json={'model':'${model}','messages':[{'role':'user','content':'${prompt}'}]})\nprint(res.json())`;
+  const curlSnippet = `TOKEN="sk-lt-YourTokenHere"\ncurl ${endpoint} \\\n  -H "Authorization: Bearer $TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"${model}","messages":[{"role":"user","content":"${prompt}"}]}'`;
+  const jsSnippet = `fetch('${endpoint}', {\n  method: 'POST',\n  headers: { Authorization: 'Bearer sk-lt-YourTokenHere', 'Content-Type': 'application/json' },\n  body: JSON.stringify({ model: '${model}', messages: [{ role: 'user', content: '${prompt}' }] })\n}).then(r => r.json()).then(console.log);`;
+  const pySnippet = `import requests\nres = requests.post('${endpoint}',\n  headers={'Authorization':'Bearer sk-lt-YourTokenHere','Content-Type':'application/json'},\n  json={'model':'${model}','messages':[{'role':'user','content':'${prompt}'}]})\nprint(res.json())`;
 
   const runDemo = async () => {
     if (!selectedSubkey) return notify('Select a subkey first', 'error');
