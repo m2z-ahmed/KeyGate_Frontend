@@ -2,6 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const clean = (value) => String(value || '').trim();
+const maskAuthId = (value) => {
+  const raw = String(value || '');
+  if (!raw) return '—';
+  if (raw.length <= 10) return `${raw.slice(0, 2)}••••${raw.slice(-2)}`;
+  const [provider, id] = raw.split('|');
+  const tail = (id || raw).slice(-6);
+  return `${provider && id ? `${provider}|` : ''}••••••${tail}`;
+};
 
 export default function ProfilePage({ ctx }) {
   const { user, updateLocalUser } = useAuth();
@@ -91,11 +99,11 @@ export default function ProfilePage({ ctx }) {
         </form>
 
         <aside className='card profile-summary-card'>
-          <div className='profile-avatar'>{clean(form.name || form.email || 'U').charAt(0).toUpperCase()}</div>
+          <div className='profile-avatar'>{user?.picture ? <img src={user.picture} alt='' /> : clean(form.name || form.email || 'U').charAt(0).toUpperCase()}</div>
           <h2>{form.name || 'Lethem User'}</h2>
           <p>{form.email || 'No email set'}</p>
           <div className='profile-summary-list'>
-            <span><b>Auth ID</b>{user?.sub || '—'}</span>
+            <span><b>Auth ID</b>{maskAuthId(user?.sub)}</span>
             <span><b>Email source</b>Auth0</span>
             <span><b>Status</b>Active account</span>
           </div>

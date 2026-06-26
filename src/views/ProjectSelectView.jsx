@@ -38,6 +38,7 @@ export default function ProjectSelectView({ go }) {
   const isAtProjectLimit = projectLimit != null && projects.length >= projectLimit;
   const userLabel = user?.name || user?.email || 'Signed in';
   const avatar = userLabel.charAt(0).toUpperCase();
+  const avatarImage = user?.picture || '';
 
 
 
@@ -175,7 +176,7 @@ export default function ProjectSelectView({ go }) {
         <div className='project-console-nav-actions'>
           <button className='project-console-icon-btn' type='button' aria-label='Notifications' onClick={() => goProjectPage('notifications')}><IconBell /></button>
           <div className='project-console-user-wrap'>
-            <button className='project-console-user' type='button' aria-haspopup='menu' aria-expanded={userMenuOpen} onClick={() => setUserMenuOpen((open) => !open)}><span>{avatar}</span>{userLabel}</button>
+            <button className='project-console-user' type='button' aria-haspopup='menu' aria-expanded={userMenuOpen} onClick={() => setUserMenuOpen((open) => !open)}><span>{avatarImage ? <img src={avatarImage} alt='' /> : avatar}</span>{userLabel}</button>
             {userMenuOpen && <div className='project-console-user-menu' role='menu'>
               <button type='button' role='menuitem' onClick={() => { setUserMenuOpen(false); go('/console/profile'); }}><IconUser /> Profile</button>
               <button type='button' role='menuitem' onClick={() => { setUserMenuOpen(false); go('/console/workspace'); }}><IconSettings /> Workspace Settings</button>
@@ -204,16 +205,7 @@ export default function ProjectSelectView({ go }) {
 
         {!hideOnboarding && (
           <section className='project-console-onboarding card'>
-            <div className='project-console-section-head'>
-              <div>
-                <strong>✣ Getting Started</strong>
-                <span>Complete these steps to get your API gateway running</span>
-              </div>
-              <div className='project-console-section-meta'>
-                <b>{completedSteps}/{onboardingSteps.length}<small>Completed</small></b>
-                <button type='button' className='onboarding-close' onClick={dismissOnboarding} aria-label='Hide getting started'>✕</button>
-              </div>
-            </div>
+            <div className='project-console-section-head'><div><strong>✣ Getting Started</strong><span>Complete these steps to get your API gateway running</span></div><div className='onboarding-meta'><b>{completedSteps}/{onboardingSteps.length}<small>Completed</small></b><button type='button' className='onboarding-close' onClick={dismissOnboarding} aria-label='Hide getting started'>✕</button></div></div>
             <div className='project-console-progress'><span style={{ width: `${onboardingPercent}%` }} /></div>
             <div className='project-console-steps'>{onboardingSteps.map((step) => { const StepTag = step.onClick ? 'button' : 'div'; return <StepTag type={step.onClick ? 'button' : undefined} className={`${step.done ? 'done' : ''} ${step.onClick ? 'clickable' : 'locked'}`} onClick={step.onClick} key={step.label}><IconCheck />{step.label}</StepTag>; })}</div>
           </section>
