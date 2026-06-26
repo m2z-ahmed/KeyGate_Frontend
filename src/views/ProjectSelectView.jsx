@@ -12,7 +12,7 @@ export default function ProjectSelectView({ go }) {
     projectToDelete, setProjectToDelete,
     deleteConfirm, setDeleteConfirm, deleteProject,
     notif, notify,
-    ctx: { API, fmtDate, fmtNum, billing, subkeys, masterKeys, analytics },
+    ctx: { API, fmtDate, fmtNum, billing, subkeys, masterKeys, analytics, copyText, copiedItem },
   } = useLethem();
   const { user, logout, getAccessToken, isAuthenticated } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -180,9 +180,9 @@ export default function ProjectSelectView({ go }) {
             <p>Create, switch, and manage isolated workspaces</p>
           </div>
           <div className='console-top-bar'>
-            <div className='console-plan-badge'>
+            <button type='button' className='console-plan-badge project-console-plan-link' onClick={() => go('/console/subscription')} aria-label='Open subscription page'>
               <span className='console-plan-dot' /> {currentPlan?.name || 'Free'} plan <span>{projects.length} / {projectLimitLabel} projects</span>
-            </div>
+            </button>
             <button className='btn btn-ghost console-create-btn project-console-manage-btn' onClick={() => go('/console/subscription')}>Manage subscription</button>
             <button className='btn btn-primary console-create-btn' disabled={isAtProjectLimit} onClick={() => go('/console/new')}>+ New project</button>
           </div>
@@ -223,13 +223,23 @@ export default function ProjectSelectView({ go }) {
         <div className='project-console-projects-head'><h2>Your Projects <span>{projects.length} / {projectLimitLabel}</span></h2><div className='project-console-search'><IconSearch /><input className='projects-search console-search-input' value={projectSearch} onChange={(e) => setProjectSearch(e.target.value)} placeholder='Search by name, label, or ID' /></div></div>
 
         <div className='projects-grid console-projects-grid'>
-          {filteredProjects.map((p) => (
-            <button key={p.id} className='card project-card console-project-card' onClick={() => go(`/console/${p.slug}/overview`)}>
-              <div className='console-project-card-header'><h3>{p.name}</h3><span className={`badge ${p.status === 'active' ? 'active' : 'paused'}`}>• {p.status}</span></div>
-              <div className='console-project-card-body'><div className='console-project-id'>{p.slug}</div><div className='console-project-date'>Created {fmtDate(p.created_at)}</div></div>
-              <div className='console-project-card-footer'><span /><span className='project-delete console-project-delete' onClick={(e) => { e.stopPropagation(); setProjectToDelete(p); setDeleteConfirm(''); }}><IconTrash /></span></div>
-            </button>
-          ))}
+          {filteredProjects.map((p) => {
+            const projectRef = p.slug || p.id;
+            const copyId = `project-${p.id}`;
+            return (
+              <article key={p.id} className='card project-card console-project-card' role='button' tabIndex={0} onClick={() => go(`/console/${projectRef}/overview`)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') go(`/console/${projectRef}/overview`); }}>
+                <div className='console-project-card-header'><h3>{p.name}</h3><span className={`badge ${p.status === 'active' ? 'active' : 'paused'}`}>• {p.status}</span></div>
+                <div className='console-project-card-body'>
+                  <div className='console-project-id-wrap'>
+                    <div className='console-project-id'>{projectRef}</div>
+                    <button type='button' className='project-id-copy' onClick={(e) => { e.stopPropagation(); copyText(projectRef, copyId); }}>{copiedItem === copyId ? 'Copied' : 'Copy ID'}</button>
+                  </div>
+                  <div className='console-project-date'>Created {fmtDate(p.created_at)}</div>
+                </div>
+                <div className='console-project-card-footer'><span /><button type='button' className='project-delete console-project-delete' onClick={(e) => { e.stopPropagation(); setProjectToDelete(p); setDeleteConfirm(''); }} aria-label={`Delete ${p.name}`}><IconTrash /></button></div>
+              </article>
+            );
+          })}
         </div>
 
         <div className={`modal-backdrop ${projectToDelete ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setProjectToDelete(null)}>

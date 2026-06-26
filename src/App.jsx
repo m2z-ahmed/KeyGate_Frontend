@@ -56,7 +56,9 @@ function BootLoader({ go, view, projectSlug, onBootComplete }) {
       .then(([list, billing]) => {
         if (cancelled) return;
         if (!list.length) {
-          if (view !== 'create' && view !== 'account') go('/console/new');
+          if (view === 'account') { onBootComplete?.(); return; }
+          if (view === 'create') { onBootComplete?.(); return; }
+          go('/console');
           onBootComplete?.();
           return;
         }

@@ -165,6 +165,15 @@ export function AuthProvider({ children }) {
     window.location.assign(`${issuer}/authorize?${params.toString()}`);
   };
 
+  const updateLocalUser = (updates = {}) => {
+    setSession((current) => {
+      if (!current) return current;
+      const next = { ...current, user: { ...current.user, ...updates } };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
   const logout = () => {
     cacheClearAll();
     localStorage.removeItem(STORAGE_KEY);
@@ -190,6 +199,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     getAccessToken,
+    updateLocalUser,
   }), [session, isLoading, authError, isConfigured]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

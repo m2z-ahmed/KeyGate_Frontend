@@ -2756,3 +2756,17 @@ kbd{
 .project-console-steps button.done{border-color:#146f50;background:#102620;color:#fff}
 .project-console-steps button svg{width:17px;height:17px;border-radius:50%;background:#202230;color:#555b6d;padding:2px;flex:none}
 .project-console-steps button.done svg{background:#24c876;color:#fff}
+.project-console-plan-link{cursor:pointer;font:inherit;display:inline-flex;align-items:center;gap:8px;transition:var(--transition)}
+.project-console-plan-link:hover{border-color:#8d7fff!important;background:#1c2032!important;color:#fff!important;transform:translateY(-1px)}
+.console-project-card{cursor:pointer}
+.console-project-id-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.project-id-copy{min-height:26px;padding:4px 8px;border:1px solid #42475b;border-radius:7px;background:#171a27;color:#d9dcff;font-size:11px;font-weight:700;cursor:pointer;transition:var(--transition)}
+.project-id-copy:hover{border-color:#8d7fff;background:#24203b;color:#fff}
+.console-project-delete{border:0;background:transparent;color:#ff8d8d;display:inline-grid;place-items:center;border-radius:7px;cursor:pointer;padding:6px}
+.console-project-delete:hover{background:#ff52521a;color:#ffc5c5}
+.profile-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.profile-editor-card .form-row{margin-bottom:14px}
+.profile-summary-card{text-align:center;position:sticky;top:94px}
+.profile-avatar{width:74px;height:74px;margin:0 auto 14px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(135deg,#7c6bff,#a594ff);font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:#fff;box-shadow:0 16px 36px rgba(124,107,255,.28),inset 0 0 0 4px rgba(255,255,255,.16)}
+.profile-summary-card h2{font-family:'Syne',sans-serif;font-size:20px;margin-bottom:4px}.profile-summary-card p{color:var(--muted);margin-bottom:16px;word-break:break-word}.profile-summary-list{display:grid;gap:9px;text-align:left}.profile-summary-list span{display:grid;gap:3px;padding:10px 12px;border:1px solid #282d40;border-radius:10px;background:#111421;color:#dfe2f6;word-break:break-word}.profile-summary-list b{font-size:10px;color:#858a9b;text-transform:uppercase;letter-spacing:.08em}
+@media (max-width:900px){.profile-grid{grid-template-columns:1fr}.profile-summary-card{position:static}}

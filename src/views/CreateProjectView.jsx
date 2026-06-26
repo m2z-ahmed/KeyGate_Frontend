@@ -9,7 +9,7 @@ export default function CreateProjectView({ go }) {
     const p = await createProject(projectName);
     if (p) {
       setProjectName('');
-      go(`/console/${p.slug}/overview`);
+      go('/console');
     }
   };
 
