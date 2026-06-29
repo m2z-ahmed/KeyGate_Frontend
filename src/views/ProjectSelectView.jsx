@@ -11,7 +11,7 @@ export default function ProjectSelectView({ go }) {
     filteredProjects, showPlanBanner, setShowPlanBanner,
     projectToDelete, setProjectToDelete,
     deleteConfirm, setDeleteConfirm, deleteProject,
-    notif, notify,
+    notif, notify, account, updateAccount,
     ctx: { API, fmtDate, fmtNum, billing, subkeys, masterKeys, analytics, copyText, copiedItem },
   } = useLethem();
   const { user, logout, getAccessToken, isAuthenticated } = useAuth();
@@ -20,6 +20,11 @@ export default function ProjectSelectView({ go }) {
   const onboardingCacheScope = user?.sub || 'anonymous';
   const onboardingDismissedKey = '/console-page/getting-started-dismissed';
   const [hideOnboarding, setHideOnboarding] = useState(() => Boolean(cacheGet(onboardingDismissedKey, onboardingCacheScope)));
+  const [setupStep, setSetupStep] = useState('name');
+  const [setupSaving, setSetupSaving] = useState(false);
+  const authName = user?.name && user.name !== user.email ? user.name : '';
+  const [setupName, setSetupName] = useState(authName || 'Lethem User');
+  const [setupWorkspaceName, setSetupWorkspaceName] = useState('My Workspace');
 
   const currentPlan = billing?.plans?.find((plan) => plan.id === billing.currentPlan) || billing?.plans?.find((plan) => plan.id === 'free');
   const limits = currentPlan?.limits || {};
@@ -39,7 +44,36 @@ export default function ProjectSelectView({ go }) {
   const userLabel = user?.name || user?.email || 'Signed in';
   const avatar = userLabel.charAt(0).toUpperCase();
   const avatarImage = user?.picture || '';
+  const needsSetup = account && !account.user?.onboarding_completed_at;
 
+  useEffect(() => {
+    if (!account) return;
+    setSetupName(account.user?.name || authName || 'Lethem User');
+    setSetupWorkspaceName(account.organization?.name || 'My Workspace');
+  }, [account?.user?.name, account?.organization?.name, authName]);
+
+  const saveSetupName = async (skip = false) => {
+    setSetupSaving(true);
+    try {
+      const name = skip ? 'Lethem User' : (setupName.trim() || 'Lethem User');
+      await updateAccount({ name });
+      setSetupStep('workspace');
+    } catch (e) {
+      notify(e.message || 'Unable to save your name', 'error');
+    } finally { setSetupSaving(false); }
+  };
+
+  const saveSetupWorkspace = async (skip = false) => {
+    setSetupSaving(true);
+    try {
+      const workspaceName = skip ? 'My Workspace' : (setupWorkspaceName.trim() || 'My Workspace');
+      await updateAccount({ workspaceName, onboardingCompleted: true });
+      setSetupStep('greet');
+      setTimeout(() => go('/console'), 1200);
+    } catch (e) {
+      notify(e.message || 'Unable to save your workspace', 'error');
+    } finally { setSetupSaving(false); }
+  };
 
 
   useEffect(() => {
@@ -171,6 +205,29 @@ export default function ProjectSelectView({ go }) {
 
   return (
     <div className='page active console-select-page'>
+
+      {needsSetup && (
+        <div className='modal-backdrop open onboarding-wizard-backdrop'>
+          <div className='modal onboarding-wizard' role='dialog' aria-modal='true' aria-label='Get Started onboarding'>
+            {setupStep === 'name' && <>
+              <div className='onboarding-kicker'>Get Started</div>
+              <div className='modal-title'>What should we call you?</div>
+              <p className='card-sub'>We prefilled this from your sign-in profile when available. You can edit it now.</p>
+              <div className='field'><label>Name</label><input value={setupName} onChange={(e) => setSetupName(e.target.value)} placeholder='Lethem User' autoFocus /></div>
+              <div className='modal-footer'><button className='btn btn-ghost' disabled={setupSaving} onClick={() => saveSetupName(true)}>Skip</button><button className='btn btn-primary' disabled={setupSaving} onClick={() => saveSetupName(false)}>Continue</button></div>
+            </>}
+            {setupStep === 'workspace' && <>
+              <div className='onboarding-kicker'>Workspace</div>
+              <div className='modal-title'>Name your workspace</div>
+              <p className='card-sub'>This is the shared home for your projects and API access settings.</p>
+              <div className='field'><label>Workspace name</label><input value={setupWorkspaceName} onChange={(e) => setSetupWorkspaceName(e.target.value)} placeholder='My Workspace' autoFocus /></div>
+              <div className='modal-footer'><button className='btn btn-ghost' disabled={setupSaving} onClick={() => saveSetupWorkspace(true)}>Skip</button><button className='btn btn-primary' disabled={setupSaving} onClick={() => saveSetupWorkspace(false)}>Finish</button></div>
+            </>}
+            {setupStep === 'greet' && <div className='onboarding-greet'><div className='onboarding-kicker'>You're all set</div><div className='modal-title'>Welcome, {(setupName || 'Lethem User').trim()}!</div><p className='card-sub'>Taking you to your console.</p></div>}
+          </div>
+        </div>
+      )}
+
       <nav className='project-console-nav'>
         <div className='project-console-brand'><span><LogoIcon size={18} /></span><div><strong>KeyGate</strong><small>Projects Console</small></div></div>
         <div className='project-console-nav-actions'>

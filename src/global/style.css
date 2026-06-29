@@ -2794,3 +2794,11 @@ kbd{
 @media (max-width:760px){.invite-form{grid-template-columns:1fr}.invite-form .btn{justify-content:center}.roles-grid{grid-template-columns:1fr}.team-table-wrap table,.team-table-wrap thead,.team-table-wrap tbody,.team-table-wrap th,.team-table-wrap td,.team-table-wrap tr{display:block}.team-table-wrap thead{display:none}.team-table-wrap tr{border-bottom:1px solid rgba(255,255,255,.08);padding:10px 0}.team-table-wrap td{border-bottom:0;padding:8px 12px}.row-actions{align-items:stretch}.row-actions select,.row-actions .btn{width:100%;justify-content:center}}
 .invite-confirm-box{margin-top:12px;padding:12px;border:1px solid rgba(255,181,71,.25);border-radius:12px;background:rgba(255,181,71,.08);display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--text)}
 @media (max-width:760px){.invite-confirm-box{align-items:stretch;flex-direction:column}}
+
+/* ── First-run Get Started onboarding ── */
+.onboarding-wizard-backdrop{z-index:220;background:rgba(3,5,13,.78);backdrop-filter:blur(10px)}
+.onboarding-wizard{max-width:460px;border-color:#5d55a0;background:linear-gradient(180deg,#171b2d,#101320);box-shadow:0 28px 90px rgba(0,0,0,.58),0 0 0 1px rgba(141,127,255,.14) inset}
+.onboarding-kicker{display:inline-flex;align-items:center;margin-bottom:12px;padding:5px 9px;border:1px solid rgba(141,127,255,.38);border-radius:999px;background:rgba(141,127,255,.12);color:#c9c2ff;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em}
+.onboarding-wizard .card-sub{margin:8px 0 16px;color:#a3a8ba;line-height:1.55}
+.onboarding-wizard .field{margin-top:14px}.onboarding-wizard input{font-size:15px}
+.onboarding-greet{text-align:center;padding:18px 0}.onboarding-greet .onboarding-kicker{margin-left:auto;margin-right:auto}

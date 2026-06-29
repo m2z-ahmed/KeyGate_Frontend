@@ -44,7 +44,7 @@ function AppError({ error, onRetry }) {
 
 // ── Initial data loader: fetches providers & projects, then routes ──
 function BootLoader({ go, view, projectSlug, onBootComplete }) {
-  const { loadProviders, loadProjects, loadBilling, notify } = useLethem();
+  const { loadProviders, loadProjects, loadBilling, loadAccount, notify } = useLethem();
   const [bootFailed, setBootFailed] = useState(null);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ function BootLoader({ go, view, projectSlug, onBootComplete }) {
     setBootFailed(null);
 
     loadProviders().catch(() => {});
-    Promise.all([loadProjects(), loadBilling?.().catch(() => null)])
+    Promise.all([loadProjects(), loadBilling?.().catch(() => null), loadAccount?.().catch(() => null)])
       .then(([list, billing]) => {
         if (cancelled) return;
         if (!list.length) {

@@ -15,7 +15,7 @@ export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const VALID_PAGES = ['overview', 'masterkeys', 'subkeys', 'logs', 'demo', 'health', 'notifications', 'billing', 'analytics', 'members', 'roles', 'invites', 'usage', 'subscription', 'invoices', 'general', 'endpoint', 'security', 'audit', 'danger', 'profile', 'workspace', 'docs'];
 
 export default function LethemProvider({ children, projectSlug, page }) {
-  const { getAccessToken, isAuthenticated, user } = useAuth();
+  const { getAccessToken, getIdToken, isAuthenticated, user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [projectName, setProjectName] = useState('');
   const [projectSearch, setProjectSearch] = useState('');
@@ -37,6 +37,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
   const [members, setMembers] = useState([]);
   const [invites, setInvites] = useState([]);
   const [teamLoading, setTeamLoading] = useState(false);
+  const [account, setAccount] = useState(null);
 
   const notify = (msg, type = 'success') => { setNotif({ show: true, msg, type }); setTimeout(() => setNotif((v) => ({ ...v, show: false })), 3000); };
 
@@ -67,6 +68,8 @@ export default function LethemProvider({ children, projectSlug, page }) {
     const cacheScope = skipAuth ? 'public' : (user?.sub || 'anonymous');
     if (!skipAuth && isAuthenticated) {
       headers.Authorization = `Bearer ${await getAccessToken()}`;
+      const idToken = await getIdToken();
+      if (idToken) headers['x-lethem-id-token'] = idToken;
     }
     delete opts.skipAuth;
     delete opts.noCache;
@@ -112,6 +115,18 @@ export default function LethemProvider({ children, projectSlug, page }) {
     } finally {
       try { sessionStorage.removeItem('lethem_pending_invite_token'); } catch (_) {}
     }
+  };
+
+  const loadAccount = async () => {
+    const data = await api('/api/me', { noCache: true });
+    setAccount(data);
+    return data;
+  };
+
+  const updateAccount = async (updates) => {
+    const data = await api('/api/me', { method: 'PATCH', body: updates });
+    setAccount((current) => ({ ...(current || {}), ...data }));
+    return data;
   };
 
   const loadProjects = async () => {
@@ -306,11 +321,11 @@ export default function LethemProvider({ children, projectSlug, page }) {
   const ctx = useMemo(() => ({
     API, providers, loadProviders, fmtNum, fmtTime, fmtDate, quotaColor, sleep,
     api, notify, copyText, modal, setModal, revealedToken, setRevealedToken,
-    loadMasterKeys, loadSubkeys, loadLogs, loadOverview, loadBilling, loadMembers, loadInvites,
+    loadMasterKeys, loadSubkeys, loadLogs, loadOverview, loadBilling, loadMembers, loadInvites, loadAccount, updateAccount,
     checkInvitee, inviteMember, acceptInvite, updateMemberRole, removeMember, revokeInvite,
-    subkeys, setSubkeys, masterKeys, logs, analytics, billing, setBilling, members, invites, teamLoading, page, loading, copiedItem,
+    subkeys, setSubkeys, masterKeys, logs, analytics, billing, setBilling, members, invites, teamLoading, account, setAccount, page, loading, copiedItem,
     selectedProject: projects.find((p) => p.slug === projectSlug || p.id === projectSlug),
-  }), [modal, subkeys, masterKeys, logs, analytics, billing, members, invites, teamLoading, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub, projects]);
+  }), [modal, subkeys, masterKeys, logs, analytics, billing, members, invites, teamLoading, account, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub, projects]);
 
   const value = useMemo(() => ({
     ctx,
@@ -319,12 +334,12 @@ export default function LethemProvider({ children, projectSlug, page }) {
     deleteConfirm, setDeleteConfirm, showPlanBanner, setShowPlanBanner,
     mobileMenuOpen, setMobileMenuOpen,
     notif,
-    createProject, deleteProject, loadProviders, loadProjects, loadBilling, notify, acceptPendingInviteToken,
+    createProject, deleteProject, loadProviders, loadProjects, loadBilling, loadAccount, updateAccount, account, notify, acceptPendingInviteToken,
     filteredProjects: projects.filter((p) =>
       `${p.name} ${p.slug} ${p.id}`.toLowerCase().includes(projectSearch.toLowerCase())
     ),
     selectedProject: projects.find((p) => p.slug === projectSlug || p.id === projectSlug),
-  }), [ctx, projects, projectName, projectSearch, projectToDelete, deleteConfirm, showPlanBanner, mobileMenuOpen, notif, projectSlug]);
+  }), [ctx, projects, projectName, projectSearch, projectToDelete, deleteConfirm, showPlanBanner, mobileMenuOpen, notif, projectSlug, account]);
 
   return <CTX.Provider value={value}>{children}</CTX.Provider>;
 }
