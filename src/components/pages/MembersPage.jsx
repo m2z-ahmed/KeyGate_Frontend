@@ -24,7 +24,7 @@ export default function MembersPage({ ctx }) {
     setBusy('check'); resetInviteCheck();
     try {
       const check = await ctx.checkInvitee(email);
-      if (check.already_member) { ctx.notify('That user is already a member of this workspace.', 'error'); return; }
+      if (check.already_member) { ctx.notify('That user is already a member of this project.', 'error'); return; }
       if (!check.exists) { setInviteCheck(check); return; }
       await sendInvite(email, role);
     } catch (e) { ctx.notify(e.message, 'error'); }
@@ -39,7 +39,7 @@ export default function MembersPage({ ctx }) {
   };
 
   const remove = async (member) => {
-    if (!confirm(`Remove ${member.email || member.name} from this workspace?`)) return;
+    if (!confirm(`Remove ${member.email || member.name} from this project?`)) return;
     setBusy(member.id);
     try { await ctx.removeMember(member.id); }
     catch (e) { ctx.notify(e.message, 'error'); }
@@ -61,13 +61,13 @@ export default function MembersPage({ ctx }) {
         </div>
         {inviteCheck && !inviteCheck.exists && (
           <div className='invite-confirm-box'>
-            <div><strong>{inviteCheck.email}</strong> is not on Lethem yet. Send an email invite so they can sign up and join this workspace?</div>
+            <div><strong>{inviteCheck.email}</strong> is not on Lethem yet. Send an email invite so they can sign up and join this project?</div>
             <div className='row-actions'><button className='btn btn-ghost btn-sm' onClick={resetInviteCheck}>Cancel</button><button className='btn btn-primary btn-sm' disabled={busy === 'invite'} onClick={() => sendInvite(inviteCheck.email, role)}>Send Email Invite</button></div>
           </div>
         )}
       </div>
       <div className='card'>
-        <div className='card-header'><div><div className='card-title'>Current members</div><div className='card-sub'>{ctx.members.length} teammate{ctx.members.length === 1 ? '' : 's'} in this workspace</div></div></div>
+        <div className='card-header'><div><div className='card-title'>Current members</div><div className='card-sub'>{ctx.members.length} teammate{ctx.members.length === 1 ? '' : 's'} in this project</div></div></div>
         {ctx.teamLoading ? <div className='empty'>Loading members…</div> : ctx.members.length === 0 ? <div className='empty'><div className='empty-text'>No members yet.</div></div> : (
           <div className='table-wrap team-table-wrap'><table><thead><tr><th>Member</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead><tbody>{ctx.members.map((m) => {
             const meta = roleMeta(m.role);

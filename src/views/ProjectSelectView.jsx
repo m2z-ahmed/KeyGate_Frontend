@@ -309,8 +309,8 @@ export default function ProjectSelectView({ go }) {
       {selectedInvite && (
         <div className='modal-backdrop open invite-notification-backdrop' onClick={(e) => e.target === e.currentTarget && setSelectedInvite(null)}>
           <div className='modal invite-notification-modal'>
-            <div className='modal-title'>Workspace invite</div>
-            <div className='invite-detail-grid'><span><b>Workspace</b>{selectedInvite.organization_name || 'Workspace'}</span><span><b>Workspace / Project</b>{selectedInvite.organization_name || 'Workspace'}</span><span><b>Sent by</b>{selectedInvite.invited_by_name || selectedInvite.invited_by_email || 'A teammate'}</span><span><b>Role</b>{selectedInvite.role}</span><span><b>Expires</b>{fmtDate(selectedInvite.expires_at)}</span></div>
+            <div className='modal-title'>Project invite</div>
+            <div className='invite-detail-grid'><span><b>Project</b>{selectedInvite.project_name || selectedInvite.organization_name || 'Project'}</span><span><b>Workspace</b>{selectedInvite.organization_name || 'Workspace'}</span><span><b>Sent by</b>{selectedInvite.invited_by_name || selectedInvite.invited_by_email || 'A teammate'}</span><span><b>Role</b>{selectedInvite.role}</span><span><b>Expires</b>{fmtDate(selectedInvite.expires_at)}</span></div>
             <div className='modal-footer'><button className='btn btn-green' disabled={notificationBusy === `invite:${selectedInvite.id}`} onClick={() => decideInvite(selectedInvite, 'accept')}>Accept</button><button className='btn btn-danger' disabled={notificationBusy === `invite:${selectedInvite.id}`} onClick={() => decideInvite(selectedInvite, 'reject')}>Reject</button><button className='btn btn-ghost' onClick={() => setSelectedInvite(null)}>Close</button></div>
           </div>
         </div>
@@ -325,7 +325,7 @@ export default function ProjectSelectView({ go }) {
               <div className='notification-popover-head'><strong>Notifications</strong><span>{notificationCount ? `${notificationCount} new` : 'All caught up'}</span></div>
               {notificationCount === 0 ? <div className='notification-empty'>No important notifications right now.</div> : <div className='notification-list'>
                 {pendingInvites.map((invite) => <div className='notification-item' key={`invite-${invite.id}`}>
-                  <div><b>Workspace invite</b><p>{invite.organization_name || 'Workspace'} invited you as {invite.role}.</p></div>
+                  <div><b>Project invite</b><p>{invite.project_name || invite.organization_name || 'Project'} invited you as {invite.role}.</p></div>
                   <button className='btn btn-sm btn-ghost' onClick={() => setSelectedInvite(invite)}>View</button>
                 </div>)}
                 {pendingQuotaRequests.map((request) => <div className='notification-item' key={`quota-${request.id}`}>
@@ -352,7 +352,7 @@ export default function ProjectSelectView({ go }) {
         <header className='console-landing-header project-console-hero'>
           <div>
             <h1>Projects Console</h1>
-            <p>Create, switch, and manage isolated workspaces</p>
+            <p>Create, switch, and manage isolated projects</p>
           </div>
           <div className='console-top-bar'>
             <button type='button' className='console-plan-badge project-console-plan-link' onClick={() => go('/console/subscription')} aria-label='Open subscription page'>
