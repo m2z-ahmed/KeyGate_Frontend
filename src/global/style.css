@@ -2802,3 +2802,14 @@ kbd{
 .onboarding-wizard .card-sub{margin:8px 0 16px;color:#a3a8ba;line-height:1.55}
 .onboarding-wizard .field{margin-top:14px}.onboarding-wizard input{font-size:15px}
 .onboarding-greet{text-align:center;padding:18px 0}.onboarding-greet .onboarding-kicker{margin-left:auto;margin-right:auto}
+
+/* ── Project select notification popover ── */
+.notification-popover-wrap{position:relative}
+.notification-bell{position:relative}
+.notification-dot{position:absolute;right:7px;top:7px;width:9px;height:9px;border-radius:999px;background:linear-gradient(135deg,#ff4d64,#5f8cff);box-shadow:0 0 0 2px #111421,0 0 16px rgba(95,140,255,.6)}
+.notification-bell.has-new{border-color:#5f8cff;color:#fff}
+.notification-popover-panel{position:absolute;right:0;top:calc(100% + 10px);z-index:190;width:min(390px,calc(100vw - 28px));max-height:min(560px,calc(100vh - 120px));overflow:auto;padding:12px;border:1px solid #313952;border-radius:16px;background:#101421;box-shadow:0 24px 70px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.06)}
+.notification-popover-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+.notification-popover-head strong{font-family:'Syne',sans-serif;color:#fff}.notification-popover-head span{font-size:11px;color:#9ca4ba}
+.notification-list{display:grid;gap:9px}.notification-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#151928}.notification-item b{display:block;color:#fff;font-size:12px}.notification-item p{margin:4px 0 0;color:#9ca4ba;font-size:12px;line-height:1.35}.notification-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.notification-empty{padding:18px 8px;text-align:center;color:#9ca4ba;font-size:13px}.invite-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.invite-detail-grid span{display:grid;gap:5px;padding:10px 12px;border:1px solid #282d40;border-radius:10px;background:#111421;color:#e7e9f8;word-break:break-word}.invite-detail-grid b{font-size:10px;color:#858a9b;text-transform:uppercase;letter-spacing:.08em}
+@media (max-width:560px){.notification-popover-panel{right:auto;left:50%;transform:translateX(-50%)}.notification-item{grid-template-columns:1fr}.notification-actions{justify-content:flex-start}.invite-detail-grid{grid-template-columns:1fr}}
