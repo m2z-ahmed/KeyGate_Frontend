@@ -2672,7 +2672,7 @@ kbd{
 /* ── End public dark theme button/background fixes ── */
 
 /* Account pages reuse the console sidebar width and keep the user menu compact. */
-.app.account-mode{grid-template-columns:var(--console-sidebar-width) minmax(0,1fr)!important}
+/*.app.account-mode{grid-template-columns:var(--console-sidebar-width) minmax(0,1fr)!important}*/
 .app.account-mode .main{grid-column:2!important;max-width:none!important;margin:0!important;width:100%!important}
 .account-sidebar{grid-column:1;grid-row:2;width:var(--console-sidebar-width)}
 .user-menu-panel-overlay,.user-menu-panel-overlay.open{max-height:none!important;overflow:visible!important}
