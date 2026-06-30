@@ -83,23 +83,22 @@ export default function BillingPage({ ctx, onBack }) {
   if (!billing && !storedDetails) return <div className='card'>Loading billing plans…</div>;
 
   return (
-    <section className='page active'>
-      <div className='billing-page account-billing-page'>
-        {onBack && <button className='btn btn-ghost btn-sm billing-back' onClick={onBack}>← Back to previous page</button>}
-        <div className='page-head billing-hero'>
-          <div>
-            <span className='eyebrow'>Account subscription</span>
-            <h1>Plans & Billing</h1>
-            <p>Subscriptions are account-level, not project-level. Upgrade once and your plan limits apply across your Lethem workspace.</p>
-          </div>
-          <span className='badge active'>{billing?.testMode ?? storedDetails?.testMode ? 'Razorpay test mode' : 'Razorpay live mode'}</span>
+    <div className='billing-page account-billing-page'>
+      {onBack && <button className='btn btn-ghost btn-sm billing-back' onClick={onBack}>← Back to previous page</button>}
+      <div className='page-head billing-hero'>
+        <div>
+          <span className='eyebrow'>Account subscription</span>
+          <h1>Plans & Billing</h1>
+          <p>Subscriptions are account-level, not project-level. Upgrade once and your plan limits apply across your Lethem workspace.</p>
         </div>
-        <div className='billing-current card billing-current-premium'>
-          <div><div className='muted'>Current plan</div><strong>{currentPlan?.name || billing?.currentPlan || storedDetails?.currentPlan || 'Free'}</strong></div>
-          <div><div className='muted'>Subscription</div><strong>{billing?.subscriptionStatus || storedDetails?.subscriptionStatus || 'Refreshing…'}</strong><small>Status is fetched live, plan details are cached locally.</small></div>
-          <div><div className='muted'>Subscription ID</div><strong className='mono'>{billing?.subscriptionId || storedDetails?.subscriptionId || '—'}</strong></div>
-          <div><div className='muted'>Currency charged</div><strong>{billing?.currency || storedDetails?.currency || 'INR'}</strong></div>
-        </div>
+        <span className='badge active'>{billing?.testMode ?? storedDetails?.testMode ? 'Razorpay test mode' : 'Razorpay live mode'}</span>
+      </div>
+      <div className='billing-current card billing-current-premium'>
+        <div><div className='muted'>Current plan</div><strong>{currentPlan?.name || billing?.currentPlan || storedDetails?.currentPlan || 'Free'}</strong></div>
+        <div><div className='muted'>Subscription</div><strong>{billing?.subscriptionStatus || storedDetails?.subscriptionStatus || 'Refreshing…'}</strong><small>Status is fetched live, plan details are cached locally.</small></div>
+        <div><div className='muted'>Subscription ID</div><strong className='mono'>{billing?.subscriptionId || storedDetails?.subscriptionId || '—'}</strong></div>
+        <div><div className='muted'>Currency charged</div><strong>{billing?.currency || storedDetails?.currency || 'INR'}</strong></div>
+      </div>
       <div className='pricing-grid pricing-grid-premium'>
         {plans.map((plan) => (
           <div key={plan.id} className={`card pricing-card premium-pricing-card ${plan.popular ? 'popular' : ''}`}>
@@ -119,7 +118,6 @@ export default function BillingPage({ ctx, onBack }) {
           </div>
         ))}
       </div>
-      </div>
-    </section>
+    </div>
   );
 }

@@ -11,12 +11,11 @@ export default function AnalyticsPage({ ctx }) {
   }, {});
 
   return (
-    <section className='page active'>
-      <div className='analytics-page'>
-        <div className='page-header'>
-          <h1 className='page-title'>Analytics</h1>
-          <p className='page-sub'>Real project analytics from request logs, token usage, providers, models, and errors.</p>
-        </div>
+    <section className='page active analytics-page'>
+      <div className='page-header'>
+        <h1 className='page-title'>Analytics</h1>
+        <p className='page-sub'>Real project analytics from request logs, token usage, providers, models, and errors.</p>
+      </div>
 
       <div className='stats mobile-quick-stats'>
         <div className='stat'><div className='stat-val'>{isLoading ? '—' : fmtNum(analytics.totalRequests)}</div><div className='stat-label'>Total requests</div></div>
@@ -44,7 +43,6 @@ export default function AnalyticsPage({ ctx }) {
       <div className='card'>
         <div className='card-header'><div><div className='card-title'>Recent analytical events</div><div className='card-sub'>Latest 10 requests powering this dashboard</div></div></div>
         {!logs.length ? <div className='empty'><div className='empty-text'>No requests logged yet</div></div> : logs.slice(0, 10).map((l) => <div className='analytics-row' key={l.id}><span>{l.subkey_name || 'Unknown subkey'} · {l.model || 'unknown'} · {l.status}</span><strong>{fmtTime(l.created_at)}</strong></div>)}
-      </div>
       </div>
     </section>
   );
