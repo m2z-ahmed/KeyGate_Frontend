@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useLethem } from '../contexts/LethemContext';
 import Sidebar from '../components/parts/Sidebar';
 import ConsoleHeader from '../components/parts/ConsoleHeader';
@@ -23,7 +22,7 @@ import InvitesPage from '../components/pages/InvitesPage';
 const PLACEHOLDER_PAGES = new Set(['invoices', 'general', 'endpoint', 'security', 'audit', 'docs']);
 
 
-function AccountSidebar({ page, navigate, onBack }) {
+function AccountSidebar({ page, navigate, onBack, drawerOpen = false, setDrawerOpen = () => {} }) {
   const items = [
     ['profile', 'Profile'],
     ['workspace', 'Workspace Settings'],
@@ -31,18 +30,35 @@ function AccountSidebar({ page, navigate, onBack }) {
     ['docs', 'Documentation'],
   ];
 
+  const go = (key) => {
+    navigate(key);
+    setDrawerOpen(false);
+  };
+
+  const content = (mobile = false) => (
+    <nav className={mobile ? 'mobile-drawer-list' : 'nav'}>
+      <button className={mobile ? 'mobile-drawer-item' : 'nav-item'} onClick={() => { onBack(); setDrawerOpen(false); }}>← Back to console</button>
+      <div className={mobile ? 'mobile-drawer-section' : 'nav-section'}>
+        <div className='nav-label'>Account</div>
+        {items.map(([key, label]) => (
+          <button key={key} className={`${mobile ? 'mobile-drawer-item' : 'nav-item'} ${page === key || (page === 'billing' && key === 'subscription') ? 'active' : ''}`} onClick={() => go(key)}>{label}</button>
+        ))}
+      </div>
+    </nav>
+  );
+
   return (
-    <aside className='sidebar account-sidebar'>
-      <nav className='nav'>
-        <button className='nav-item' onClick={onBack}>← Back to console</button>
-        <div className='nav-section'>
-          <div className='nav-label'>Account</div>
-          {items.map(([key, label]) => (
-            <button key={key} className={`nav-item ${page === key || (page === 'billing' && key === 'subscription') ? 'active' : ''}`} onClick={() => navigate(key)}>{label}</button>
-          ))}
-        </div>
-      </nav>
-    </aside>
+    <>
+      <aside className='sidebar account-sidebar'>
+        {content(false)}
+      </aside>
+      <div className={`mobile-drawer-backdrop ${drawerOpen ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setDrawerOpen(false)}>
+        <aside className='mobile-drawer account-mobile-drawer'>
+          <div className='mobile-drawer-title'>Account</div>
+          {content(true)}
+        </aside>
+      </div>
+    </>
   );
 }
 
@@ -81,15 +97,6 @@ export default function ConsoleShell({ go, page, projectSlug, accountMode = fals
   };
   const goAccountBack = () => go(getAccountBackPath());
   const PageComponent = PAGES[page];
-  const pageBlocked = !accountMode && ctx.access && !ctx.access.canAccessPage(page);
-
-  useEffect(() => {
-    if (!pageBlocked) return;
-    ctx.notify(ctx.access.denied(`open ${page}`), 'error');
-    go(`/console/${projectSlug}/overview`);
-  }, [pageBlocked, page, projectSlug]);
-
-  if (pageBlocked) return null;
 
   return (
     <>
@@ -105,7 +112,7 @@ export default function ConsoleShell({ go, page, projectSlug, accountMode = fals
           navigate={navigate}
         />
         {accountMode ? (
-          <AccountSidebar page={page} navigate={navigate} onBack={goAccountBack} />
+          <AccountSidebar page={page} navigate={navigate} onBack={goAccountBack} drawerOpen={mobileMenuOpen} setDrawerOpen={setMobileMenuOpen} />
         ) : (
           <Sidebar
             page={page}
