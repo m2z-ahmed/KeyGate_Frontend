@@ -112,14 +112,13 @@ export default function ConsoleHeader({ page, selectedProject, projectSlug, onSw
         <button className={`mobile-icon-btn mobile-menu-toggle ${mobileMenuOpen ? 'active' : ''}`} onClick={onOpenMobileMenu} aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileMenuOpen}>
           <IconMenu width={20} height={20} />
         </button>
-        <div>
+        <div className='mobile-appbar-center'>
           <div className='mobile-brand'>Lethem</div>
           <div className='mobile-shell-sub'>{pageTitle}</div>
         </div>
         <div className='mobile-appbar-actions'>
           <button className='mobile-icon-btn' onClick={onOpenNotifications} aria-label='Notifications'><IconBell width={20} height={20} /></button>
           <button className='mobile-avatar' onClick={() => goAccount('profile')} aria-label='Profile'>{user?.picture ? <img src={user.picture} alt='' /> : avatar}</button>
-          <button className='mobile-logout' onClick={logout} aria-label='Logout'>Logout</button>
         </div>
       </div>
     </header>
