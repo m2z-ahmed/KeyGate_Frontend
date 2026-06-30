@@ -2703,3 +2703,249 @@ th.sortable.desc::after{
     font-size:12px;
   }
 }
+
+/* ── Project Console Mobile Polish ── */
+@media (max-width: 900px){
+  .project-console-nav{
+    min-height:52px;
+    padding:8px 14px;
+  }
+
+  .project-console-brand strong{
+    font-size:12px;
+  }
+
+  .project-console-brand small{
+    display:none;
+  }
+
+  .project-console-user{
+    height:36px;
+    padding:5px 10px 5px 4px;
+    font-size:11px;
+  }
+
+  .project-console-user span{
+    width:24px;
+    height:24px;
+  }
+
+  .project-console-icon-btn{
+    width:36px;
+    height:36px;
+  }
+
+  .console-select-page .project-console-hero h1{
+    font-size:22px!important;
+  }
+
+  .project-console-hero p{
+    font-size:12px;
+  }
+
+  .project-console-stat{
+    min-height:72px;
+    padding:12px;
+  }
+
+  .project-console-stat strong{
+    font-size:18px;
+  }
+
+  .project-console-stat span{
+    font-size:9px;
+    margin-bottom:8px;
+  }
+
+  .project-console-onboarding.card,
+  .project-console-plan.card{
+    padding:16px;
+  }
+
+  .project-console-section-head strong{
+    font-size:12px;
+  }
+
+  .project-console-section-head b{
+    font-size:16px;
+  }
+
+  .project-console-actions button{
+    height:56px;
+    padding:0 12px;
+  }
+
+  .project-console-actions button>svg:first-child{
+    width:26px;
+    height:26px;
+  }
+
+  .project-console-actions strong{
+    font-size:11px;
+  }
+
+  .project-console-actions small{
+    font-size:10px;
+  }
+
+  .console-select-page .console-info-banner{
+    padding:14px 16px!important;
+  }
+
+  .console-select-page .console-project-card{
+    padding:16px!important;
+    min-height:auto;
+  }
+
+  .console-project-card-header h3{
+    font-size:15px!important;
+  }
+}
+
+@media (max-width: 520px){
+  .project-console-nav{
+    padding:8px 12px;
+    gap:8px;
+  }
+
+  .project-console-nav-actions{
+    gap:8px;
+  }
+
+  .project-console-user{
+    max-width:140px;
+  }
+
+  .project-console-search{
+    width:100%;
+  }
+
+  .console-select-page .project-console-hero h1{
+    font-size:18px!important;
+  }
+
+  .project-console-stat{
+    min-height:64px;
+    padding:10px;
+  }
+
+  .project-console-stat strong{
+    font-size:16px;
+  }
+
+  .project-console-actions button{
+    height:52px;
+  }
+}
+
+/* ── Mobile page spacing polish ── */
+@media (max-width: 760px){
+  .page-title{
+    font-size:20px;
+    margin-bottom:4px;
+  }
+
+  .page-sub{
+    font-size:13px;
+  }
+
+  .card{
+    padding:16px;
+    border-radius:12px;
+  }
+
+  .card-title{
+    font-size:14px;
+  }
+
+  .stat{
+    padding:14px;
+  }
+
+  .stat-val{
+    font-size:22px;
+  }
+
+  .stat-label{
+    font-size:10px;
+  }
+}
+
+/* ── Mobile tab bar polish ── */
+@media (max-width: 900px){
+  .mobile-tabbar{
+    padding:10px 12px;
+    gap:6px;
+  }
+
+  .mobile-tab{
+    min-height:44px;
+    min-width:68px;
+    border-radius:10px;
+  }
+
+  .mobile-tab span:first-child{
+    font-size:18px;
+  }
+}
+
+/* ── Mobile drawer polish ── */
+@media (max-width: 900px){
+  .mobile-drawer{
+    padding:20px 16px;
+  }
+
+  .mobile-drawer-title{
+    font-size:20px;
+    margin-bottom:16px;
+  }
+
+  .mobile-drawer-item{
+    min-height:48px;
+    padding:12px 14px;
+    border-radius:10px;
+  }
+
+  .mobile-drawer-item svg{
+    width:18px;
+    height:18px;
+  }
+}
+
+/* ── Mobile appbar polish ── */
+@media (max-width: 900px){
+  .mobile-appbar{
+    padding:10px 14px;
+  }
+
+  .mobile-brand{
+    font-size:17px;
+  }
+
+  .mobile-shell-sub{
+    font-size:11px;
+  }
+
+  .mobile-icon-btn,
+  .mobile-avatar{
+    min-width:42px;
+    min-height:42px;
+    border-radius:12px;
+  }
+}
+
+@media (max-width: 480px){
+  .mobile-brand{
+    font-size:16px;
+  }
+
+  .mobile-shell-sub{
+    font-size:10px;
+  }
+
+  .mobile-icon-btn,
+  .mobile-avatar{
+    min-width:40px;
+    min-height:40px;
+  }
+}
