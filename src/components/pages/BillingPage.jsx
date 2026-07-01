@@ -99,10 +99,6 @@ export default function BillingPage({ ctx, onBack }) {
         <div><div className='muted'>Subscription ID</div><strong className='mono'>{billing?.subscriptionId || storedDetails?.subscriptionId || '—'}</strong></div>
         <div><div className='muted'>Currency charged</div><strong>{billing?.currency || storedDetails?.currency || 'INR'}</strong></div>
       </div>
-      <div className='card master-key-limits-card'>
-        <div className='card-header'><div><div className='card-title'>Master key storage limits</div><div className='card-sub'>Limits apply to any provider keys you store in Lethem.</div></div></div>
-        <div className='master-key-limit-grid'>{plans.map((plan) => <div key={plan.id} className='master-key-limit-item'><strong>{plan.name}</strong><span>{plan.limits?.masterKeys ? (plan.id === 'scale' ? `Up to ${plan.limits.masterKeys} Provider Keys` : `${plan.limits.masterKeys} Master Keys`) : '—'}</span></div>)}</div>
-      </div>
       <div className='pricing-grid pricing-grid-premium'>
         {plans.map((plan) => (
           <div key={plan.id} className={`card pricing-card premium-pricing-card ${plan.popular ? 'popular' : ''}`}>

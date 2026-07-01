@@ -243,7 +243,14 @@ export default function LethemProvider({ children, projectSlug, page }) {
 
   const revokeInvite = async (inviteId) => {
     const res = await api(`/api/invites/${encodeURIComponent(inviteId)}`, { method: 'DELETE' });
-    notify('Invite revoked');
+    notify(res.deleted ? 'Invite deleted' : 'Invite revoked');
+    await loadInvites();
+    return res;
+  };
+
+  const deleteInvite = async (inviteId) => {
+    const res = await api(`/api/invites/${encodeURIComponent(inviteId)}`, { method: 'DELETE' });
+    notify(res.deleted ? 'Invite deleted' : 'Invite revoked');
     await loadInvites();
     return res;
   };
@@ -322,7 +329,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
     API, providers, loadProviders, fmtNum, fmtTime, fmtDate, quotaColor, sleep,
     api, notify, copyText, modal, setModal, revealedToken, setRevealedToken,
     loadMasterKeys, loadSubkeys, loadLogs, loadOverview, loadBilling, loadMembers, loadInvites, loadAccount, updateAccount,
-    checkInvitee, inviteMember, acceptInvite, updateMemberRole, removeMember, revokeInvite,
+    checkInvitee, inviteMember, acceptInvite, updateMemberRole, removeMember, revokeInvite, deleteInvite,
     subkeys, setSubkeys, masterKeys, logs, analytics, billing, setBilling, members, invites, teamLoading, account, setAccount, page, loading, copiedItem,
     selectedProject: projects.find((p) => p.slug === projectSlug || p.id === projectSlug),
   }), [modal, subkeys, masterKeys, logs, analytics, billing, members, invites, teamLoading, account, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub, projects]);
