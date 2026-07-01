@@ -2842,3 +2842,18 @@ kbd{
 }
 @media (max-width:420px){.mobile-nav-popover{max-width:calc(100vw - 20px)}.master-key-limit-grid{grid-template-columns:1fr}.mobile-appbar-actions{gap:4px}.mobile-console-back{display:none!important}}
 @media (max-height:600px) and (orientation:landscape){:root{--console-mobile-header-height:56px!important}.app-shell-mobile.mobile-appbar{min-height:56px}.mobile-tabbar{bottom:6px!important}.mobile-tab{min-height:44px!important}.main{padding-bottom:68px!important}.mobile-drawer-backdrop.open{top:var(--console-mobile-header-height)!important}.mobile-drawer{height:calc(100svh - var(--console-mobile-header-height))!important;max-height:calc(100svh - var(--console-mobile-header-height))!important}.mobile-drawer-title{font-size:18px;margin-bottom:8px;padding-bottom:8px}.mobile-drawer-item{min-height:42px}.page,.page.active{padding-top:10px!important}}
+
+/* ── Mobile shell hardening pass ── */
+@media (max-width:900px){
+  .app-shell-header.console-header{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:170000!important;display:block!important;width:100%!important;visibility:visible!important;opacity:1!important}
+  .app-shell-mobile.mobile-appbar{display:grid!important;visibility:visible!important;opacity:1!important}
+  .mobile-tabbar{position:fixed!important;display:grid!important;visibility:visible!important;opacity:1!important;z-index:170000!important}
+  .main{padding-top:var(--console-mobile-header-height)!important;height:100svh!important;min-height:100svh!important;grid-row:1 / -1!important}
+  .page,.page.active{padding-bottom:calc(92px + env(safe-area-inset-bottom))!important}
+  .page-title,.card-title,.console-title,.mobile-brand,.mobile-shell-sub,.stat-val,.stat-label,.pricing-card h2,.pricing-features li,.badge,.btn{max-width:100%;overflow:visible;text-overflow:clip;line-height:1.25}
+  .page-sub,.card-sub,.muted,.field-help,p,small{max-width:100%;overflow:visible;text-overflow:clip;line-height:1.5}
+  .card,.page-header,.stat,.pricing-card,.billing-current,.empty,.invite-confirm-box{overflow:visible!important}
+}
+@media (max-height:600px) and (orientation:landscape){
+  .app-shell-header.console-header{min-height:56px!important}.main{padding-top:56px!important;height:100svh!important}.mobile-tabbar{left:8px!important;right:8px!important;bottom:6px!important}.page,.page.active{padding-bottom:62px!important}
+}

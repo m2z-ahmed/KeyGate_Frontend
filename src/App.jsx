@@ -53,7 +53,7 @@ function BootLoader({ go, view, projectSlug, onBootComplete }) {
 
     loadProviders().catch(() => {});
     Promise.all([loadProjects(), loadBilling?.().catch(() => null), loadAccount?.().catch(() => null)])
-      .then(([list, billing]) => {
+      .then(async ([list, billing]) => {
         if (cancelled) return;
         if (!list.length) {
           if (view === 'account') { onBootComplete?.(); return; }
@@ -68,8 +68,12 @@ function BootLoader({ go, view, projectSlug, onBootComplete }) {
         if (view === 'create' && projectLimit != null && list.length >= projectLimit) { go('/console'); onBootComplete?.(); return; }
         if (view === 'account') { onBootComplete?.(); return; }
         if (projectSlug && !list.find((p) => p.slug === projectSlug || p.id === projectSlug)) {
-          notify('Project not found', 'error');
-          go('/console');
+          const refreshed = await loadProjects().catch(() => []);
+          if (cancelled) return;
+          if (!refreshed.find((p) => p.slug === projectSlug || p.id === projectSlug)) {
+            notify('Project not found', 'error');
+            go('/console');
+          }
         }
         onBootComplete?.();
       })
