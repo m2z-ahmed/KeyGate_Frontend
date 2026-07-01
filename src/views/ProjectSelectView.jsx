@@ -317,7 +317,7 @@ export default function ProjectSelectView({ go }) {
       )}
 
       <nav className='project-console-nav'>
-        <div className='project-console-brand'><span><LogoIcon size={18} /></span><div><strong>KeyGate</strong><small>Projects Console</small></div></div>
+        <div className='project-console-brand'><span><LogoIcon size={18} /></span><div><strong>Lethem</strong><small>Projects Console</small></div></div>
         <div className='project-console-nav-actions'>
           <div className='notification-popover-wrap' ref={notificationWrapRef}>
             <button className={`project-console-icon-btn notification-bell ${hasNewNotifications ? 'has-new' : ''}`} type='button' aria-label='Notifications' aria-expanded={notificationsOpen} onClick={toggleNotifications}><IconBell />{hasNewNotifications && <span className='notification-dot' />}</button>

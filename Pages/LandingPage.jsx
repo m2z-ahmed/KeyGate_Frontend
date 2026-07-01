@@ -143,7 +143,7 @@ function HeroCard() {
       <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-300/30">
         <img
           src="/og-image.png"
-          alt="KeyGate product preview"
+          alt="Lethem product preview"
           className="h-auto w-full object-cover"
         />
       </div>

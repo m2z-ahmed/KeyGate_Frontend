@@ -232,7 +232,7 @@ export const POLICY_BADGES = [
 ];
 
 export const SOCIAL_LINKS = [
-  { label: 'GitHub', href: 'https://github.com/m2z-ahmed/KeyGate_Frontend' },
+  { label: 'GitHub', href: 'https://github.com/m2z-ahmed/Lethem_Frontend' },
   { label: 'X', href: 'https://x.com' },
   { label: 'LinkedIn', href: 'https://linkedin.com' },
 ];

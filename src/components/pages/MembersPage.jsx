@@ -69,10 +69,16 @@ export default function MembersPage({ ctx }) {
       <div className='card'>
         <div className='card-header'><div><div className='card-title'>Current members</div><div className='card-sub'>{ctx.members.length} teammate{ctx.members.length === 1 ? '' : 's'} in this project</div></div></div>
         {ctx.teamLoading ? <div className='empty'>Loading members…</div> : ctx.members.length === 0 ? <div className='empty'><div className='empty-text'>No members yet.</div></div> : (
-          <div className='table-wrap team-table-wrap'><table><thead><tr><th>Member</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead><tbody>{ctx.members.map((m) => {
-            const meta = roleMeta(m.role);
-            return <tr key={m.id}><td><div className='member-cell'>{m.picture_url && <img src={m.picture_url} alt='' />}<div><strong>{m.name || m.email || 'Lethem user'}</strong><span>{m.email}{m.is_current_user ? ' · You' : ''}</span></div></div></td><td><span className={`badge ${meta.tone}`}>{meta.label}</span></td><td>{ctx.fmtDate(m.joined_at)}</td><td><div className='row-actions'>{m.role === 'owner' || m.is_current_user ? <span className='muted-text'>Protected</span> : <><select value={m.role} disabled={busy === m.id} onChange={(e) => changeRole(m, e.target.value)}>{ASSIGNABLE_ROLES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}</select><button className='btn btn-danger btn-sm' disabled={busy === m.id} onClick={() => remove(m)}>Remove</button></>}</div></td></tr>;
-          })}</tbody></table></div>
+          <>
+            <div className='table-wrap team-table-wrap'><table><thead><tr><th>Member</th><th>Role</th><th>Joined</th><th>Actions</th></tr></thead><tbody>{ctx.members.map((m) => {
+              const meta = roleMeta(m.role);
+              return <tr key={m.id}><td><div className='member-cell'>{m.picture_url && <img src={m.picture_url} alt='' />}<div><strong>{m.name || m.email || 'Lethem user'}</strong><span>{m.email}{m.is_current_user ? ' · You' : ''}</span></div></div></td><td><span className={`badge ${meta.tone}`}>{meta.label}</span></td><td>{ctx.fmtDate(m.joined_at)}</td><td><div className='row-actions'>{m.role === 'owner' || m.is_current_user ? <span className='muted-text'>Protected</span> : <><select value={m.role} disabled={busy === m.id} onChange={(e) => changeRole(m, e.target.value)}>{ASSIGNABLE_ROLES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}</select><button className='btn btn-danger btn-sm' disabled={busy === m.id} onClick={() => remove(m)}>Remove</button></>}</div></td></tr>;
+            })}</tbody></table></div>
+            <div className='team-member-cards'>{ctx.members.map((m) => {
+              const meta = roleMeta(m.role);
+              return <article className='team-member-card' key={m.id}><div className='team-member-main'><div className='team-member-avatar'>{m.picture_url ? <img src={m.picture_url} alt='' /> : (m.name || m.email || 'L').charAt(0).toUpperCase()}</div><div><strong>{m.name || m.email || 'Lethem user'}</strong><span>{m.email}{m.is_current_user ? ' · You' : ''}</span></div></div><div className='team-member-meta'><span className={`badge ${meta.tone}`}>{meta.label}</span><span>{ctx.fmtDate(m.joined_at)}</span></div>{m.role === 'owner' || m.is_current_user ? <span className='muted-text'>Protected</span> : <div className='team-member-actions'><select value={m.role} disabled={busy === m.id} onChange={(e) => changeRole(m, e.target.value)}>{ASSIGNABLE_ROLES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}</select><button className='btn btn-danger btn-sm' disabled={busy === m.id} onClick={() => remove(m)}>Remove</button></div>}</article>;
+            })}</div>
+          </>
         )}
       </div>
     </section>
