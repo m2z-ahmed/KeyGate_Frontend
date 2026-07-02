@@ -1,39 +1,57 @@
+<div align="center">
+
 # Lethem
 
-![Status](https://img.shields.io/badge/status-active-22c55e)
-![Version](https://img.shields.io/badge/version-v1-blue)
-![License](https://img.shields.io/badge/license-Private-red)
+### Developer-first AI Gateway for secure API key management, access control, and observability.
 
-> Secure AI API Access Management & Gateway
+<p>
+  <img src="https://img.shields.io/badge/status-active-22c55e?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/version-v1.0-3B82F6?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/license-Private-E11D48?style=for-the-badge" />
+</p>
 
-Lethem is a developer-first platform for securely managing AI provider credentials, generating scoped API subkeys, monitoring usage, and controlling access across projects and teams.
+<p>
+  <img src="https://img.shields.io/badge/AI-Gateway-7C3AED?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/RBAC-Enabled-9333EA?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Security-Encrypted-16A34A?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Monitoring-Live-F59E0B?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Subkeys-Scoped-0EA5E9?style=for-the-badge" />
+</p>
 
-Instead of exposing your provider API keys directly to applications or teammates, Lethem acts as a secure gateway between your applications and AI providers.
+</div>
+
+---
+
+## Overview
+
+Lethem is a secure AI gateway that sits between your applications and AI providers.
+
+Instead of exposing provider API keys directly inside your applications, Lethem allows you to securely store provider credentials, generate scoped subkeys, monitor usage, enforce limits, and manage team access from a single platform.
+
+Designed for developers, startups, and AI products that need security, visibility, and control.
 
 ---
 
 ## Why Lethem?
 
-Most AI applications expose or tightly couple provider API keys with backend services.
+Most AI applications eventually face problems like:
 
-Lethem helps you:
+- Sharing provider API keys across multiple applications
+- No way to revoke access without rotating the original key
+- Limited visibility into usage and spending
+- Difficult team management
+- No centralized monitoring
+- Weak permission controls
 
-- 🔐 Keep provider API keys private
-- 🔑 Generate scoped subkeys with permissions
-- 📊 Monitor requests, tokens, and costs
-- 👥 Manage team access using roles
-- 🚦 Apply quotas and request limits
-- 📈 View analytics and usage insights
-- 🛡 Detect abuse and unusual activity
-- 🔄 Rotate provider credentials without changing client integrations
+Lethem solves these problems by introducing a secure gateway layer between your applications and AI providers.
 
 ---
 
 ## Features
 
-### Provider Keys
+### 🔐 Secure Provider Keys
 
-Securely store your AI provider API keys.
+Store provider API keys securely.
 
 Supported providers include:
 
@@ -46,13 +64,13 @@ Supported providers include:
 - DeepSeek
 - Mistral AI
 
-(Additional providers can be added.)
+Additional providers can be added without changing your applications.
 
 ---
 
-### Subkeys
+### 🔑 Scoped Subkeys
 
-Generate secure API subkeys that reference your provider keys without exposing them.
+Generate secure subkeys instead of exposing provider credentials.
 
 Configure:
 
@@ -65,140 +83,122 @@ Configure:
 
 ---
 
-### Projects
+### 📁 Projects
 
-Organize AI resources into separate projects.
+Organize resources into isolated projects.
 
-Each project contains its own:
+Each project includes:
 
 - Provider Keys
 - Subkeys
-- Team Members
+- Members
 - Roles
 - Analytics
 - Logs
+- Settings
 
 ---
 
-### Team Collaboration
+### 👥 Team Management
 
-Invite teammates with role-based permissions.
+Collaborate securely with role-based access control.
 
-Examples:
+Roles include:
 
 - Owner
 - Admin
 - Developer
 - Viewer
 
-Each role has configurable permissions.
+Permissions are configurable per project.
 
 ---
 
-### Monitoring
+### 📊 Monitoring
 
-Monitor everything happening inside your project.
+Gain complete visibility into your AI usage.
 
-Includes:
+Features include:
 
-- Usage Analytics
-- Token Consumption
+- Analytics
+- Usage Tracking
 - Request Logs
 - Notifications
 - Health Monitoring
 
 ---
 
-### Security
+### 🛡 Security
 
-Built with security first.
+Built with security as a first-class feature.
 
-Features include:
-
-- Encrypted provider keys
-- Scoped subkeys
-- Permission-based access
-- Audit logs
-- Abuse detection
-- Request validation
+- Encrypted Provider Keys
+- Scoped API Subkeys
+- Role-Based Access Control
+- Audit Logs
+- Abuse Detection
+- Request Validation
 
 ---
 
 ## Architecture
 
-```
-Client Application
-        │
-        ▼
-     Lethem API
-        │
-        ▼
- Permission Checks
- Quotas
- Logging
- Analytics
- Routing
-        │
-        ▼
- AI Provider
-(OpenAI, Google, Groq, etc.)
+```text
+                Client Application
+                        │
+                        ▼
+                Lethem Gateway
+      ┌────────────────────────────────┐
+      │ Authentication                 │
+      │ Permission Checks              │
+      │ Request Validation             │
+      │ Quotas & Rate Limits           │
+      │ Logging & Analytics            │
+      │ Provider Routing               │
+      └────────────────────────────────┘
+                        │
+                        ▼
+        Google • OpenAI • Anthropic • Groq
 ```
 
 ---
 
-## Example Flow
+## Typical Workflow
 
-```
-Developer
-
-↓
-
-Creates Project
-
-↓
-
-Adds Provider Key
-
-↓
-
-Generates Subkey
-
-↓
-
-Uses Subkey in Application
-
-↓
-
-Lethem securely forwards requests
-
-↓
-
-Provider returns response
+```text
+Create Project
+      │
+      ▼
+Add Provider Key
+      │
+      ▼
+Generate Subkey
+      │
+      ▼
+Integrate Subkey
+      │
+      ▼
+Lethem validates every request
+      │
+      ▼
+AI Provider
 ```
 
 ---
 
 ## Use Cases
 
-- AI SaaS products
-- Internal AI tools
-- Team collaboration
-- API key protection
-- Cost monitoring
-- Multi-provider routing
-- Enterprise AI integrations
+- AI SaaS Platforms
+- Internal AI Tools
+- Team Collaboration
+- API Key Protection
+- Cost Monitoring
+- Multi-Provider Routing
+- Enterprise AI Applications
 
 ---
 
-## Pricing
-
-Lethem offers multiple plans for individuals, startups, and growing teams.
-
-See the latest pricing on the website.
-
----
-
-## Roadmap
+## Planned Features
 
 - SDKs
 - Webhooks
@@ -209,19 +209,34 @@ See the latest pricing on the website.
 
 ---
 
-## Security
+## Philosophy
 
-Provider API keys are encrypted before storage.
+Applications should never require direct access to provider API keys.
 
-Applications should always use generated subkeys instead of provider credentials directly.
+Instead:
+
+```text
+Application
+      │
+      ▼
+Scoped Subkey
+      │
+      ▼
+Lethem Gateway
+      │
+      ▼
+AI Provider
+```
+
+This approach improves security, simplifies key rotation, enables granular permissions, and provides centralized observability.
 
 ---
 
 ## Contributing
 
-Contributions, discussions, and feature requests are welcome.
+Feature requests, discussions, and bug reports are welcome.
 
-Please open an issue before submitting large changes.
+If you'd like to contribute, please open an issue before submitting large changes.
 
 ---
 
