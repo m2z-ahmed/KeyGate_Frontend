@@ -1,27 +1,37 @@
-import { LogoFull } from '../components/parts/Logo';
 import { useAuth } from '../contexts/AuthContext';
+import { LogoIcon } from '../components/parts/Logo';
 
 export default function LoginView() {
   const { login, authError, isConfigured } = useAuth();
-
   return (
-    <div className='auth-page'>
-      <div className='auth-card'>
-        <LogoFull size={28} />
-        <div className='auth-kicker'>Secure AI access gateway</div>
-        <h1>Sign in to Lethem</h1>
-        <p>
-          Manage provider master keys, scoped subkeys, quota controls, and gateway logs from a protected console.
-        </p>
-        {!isConfigured && (
-          <div className='auth-warning'>
-            Auth0 is not configured. Add VITE_AUTH0_DOMAIN, VITE_CLIENT_ID, and VITE_AUTH0_AUDIENCE in Vercel.
+    <div className='login-view'>
+      <div className='login-card'>
+        <div className='login-logo'>
+          <LogoIcon size={48} />
+        </div>
+        <div className='login-head'>
+          <h1 className='login-title'>Lethem Console</h1>
+          <p className='login-sub'>AI access governance — sign in to continue</p>
+        </div>
+        {authError && (
+          <div className='login-error'>
+            {authError}
           </div>
         )}
-        {authError && <div className='auth-warning'>{authError}</div>}
-        <button className='btn btn-primary auth-button' onClick={login}>Continue with Auth0</button>
-        <div className='auth-note'>Google and email/password sign-in are handled by your Auth0 Universal Login.</div>
+        {!isConfigured && (
+          <div className='login-config-warn'>
+            <strong>Auth0 not configured.</strong>
+            <br />
+            Add <code>VITE_AUTH0_DOMAIN</code>, <code>VITE_CLIENT_ID</code>, and <code>VITE_AUTH0_AUDIENCE</code> to your environment variables.
+          </div>
+        )}
+        <button className='btn btn-primary btn-login' onClick={login} disabled={!isConfigured}>
+          Sign in with Auth0
+        </button>
+        <p className='login-hint'>You'll be redirected to Auth0 to authenticate.</p>
       </div>
+      <div className='login-bg-orb login-bg-orb-1' />
+      <div className='login-bg-orb login-bg-orb-2' />
     </div>
   );
 }

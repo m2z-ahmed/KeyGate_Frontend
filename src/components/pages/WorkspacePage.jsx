@@ -35,51 +35,37 @@ export default function WorkspacePage({ ctx }) {
       setWorkspace((current) => ({ ...current, name: org.name || clean(workspace.name), slug: org.slug || current.slug, plan: org.plan || current.plan, role: org.role || current.role }));
       setOriginalName(org.name || clean(workspace.name));
       ctx.notify('Workspace updated');
-    } catch (err) {
-      ctx.notify(err.message || 'Unable to update workspace', 'error');
-    } finally {
-      setSaving(false);
-    }
+    } catch (err) { ctx.notify(err.message || 'Unable to update workspace', 'error'); }
+    finally { setSaving(false); }
   };
 
   return (
     <section className='page active workspace-page'>
-      <div className='page-header'>
-        <h1 className='page-title'>Workspace Settings</h1>
-        <p className='page-sub'>Manage the organization identity shared across projects, billing, and teammates.</p>
-      </div>
-
-      <div className='profile-grid'>
-        <form className='card profile-editor-card' onSubmit={saveWorkspace}>
-          <div className='card-header'>
-            <div>
-              <div className='card-title'>Workspace identity</div>
-              <div className='card-sub'>Rename the workspace your account owns or administers.</div>
+      <div className='page-inner'>
+        <div className='page-header'>
+          <h1 className='page-title'>Workspace Settings</h1>
+          <p className='page-sub'>Manage the organization identity shared across projects, billing, and teammates.</p>
+        </div>
+        <div className='profile-grid'>
+          <form className='card profile-editor-card' onSubmit={saveWorkspace}>
+            <div className='card-header'>
+              <div><div className='card-title'>Workspace identity</div><div className='card-sub'>Rename the workspace your account owns or administers.</div></div>
+              <span className='badge active'>{loading ? 'Loading' : 'Editable'}</span>
             </div>
-            <span className='badge active'>{loading ? 'Loading' : 'Editable'}</span>
-          </div>
-          <div className='form-row single'>
-            <div className='field'>
-              <label>Workspace name</label>
-              <input value={workspace.name} onChange={(e) => setWorkspace((v) => ({ ...v, name: e.target.value }))} placeholder='Acme Workspace' disabled={loading || saving} />
+            <div className='form-row single'><div className='field'><label>Workspace name</label><input value={workspace.name} onChange={(e) => setWorkspace((v) => ({ ...v, name: e.target.value }))} placeholder='Acme Workspace' disabled={loading || saving} /></div></div>
+            <div className='modal-footer'><button type='button' className='btn btn-ghost' disabled={!changed || saving || loading} onClick={() => setWorkspace((v) => ({ ...v, name: originalName }))}>Reset</button><button type='submit' className='btn btn-primary' disabled={!changed || saving || loading}>{saving ? 'Saving…' : 'Save workspace'}</button></div>
+          </form>
+          <aside className='card profile-summary-card'>
+            <div className='profile-avatar'>{clean(workspace.name || 'W').charAt(0).toUpperCase()}</div>
+            <h2>{workspace.name || 'Workspace'}</h2>
+            <p>{workspace.slug || 'Workspace slug'}</p>
+            <div className='profile-summary-list'>
+              <span><b>Your role</b>{workspace.role || '—'}</span>
+              <span><b>Plan</b>{workspace.plan || 'free'}</span>
+              <span><b>Scope</b>Account-level settings</span>
             </div>
-          </div>
-          <div className='modal-footer'>
-            <button type='button' className='btn btn-ghost' disabled={!changed || saving || loading} onClick={() => setWorkspace((v) => ({ ...v, name: originalName }))}>Reset</button>
-            <button type='submit' className='btn btn-primary' disabled={!changed || saving || loading}>{saving ? 'Saving…' : 'Save workspace'}</button>
-          </div>
-        </form>
-
-        <aside className='card profile-summary-card'>
-          <div className='profile-avatar'>{clean(workspace.name || 'W').charAt(0).toUpperCase()}</div>
-          <h2>{workspace.name || 'Workspace'}</h2>
-          <p>{workspace.slug || 'Workspace slug'}</p>
-          <div className='profile-summary-list'>
-            <span><b>Your role</b>{workspace.role || '—'}</span>
-            <span><b>Plan</b>{workspace.plan || 'free'}</span>
-            <span><b>Scope</b>Account-level settings</span>
-          </div>
-        </aside>
+          </aside>
+        </div>
       </div>
     </section>
   );

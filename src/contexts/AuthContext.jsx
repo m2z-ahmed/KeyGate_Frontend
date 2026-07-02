@@ -34,9 +34,7 @@ function parseJwt(token) {
     const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
     const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
     return JSON.parse(atob(padded));
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 function readSession() {
@@ -45,9 +43,7 @@ function readSession() {
     if (!session?.access_token || !session?.expires_at) return null;
     if (Number(session.expires_at) <= Date.now() + 30000) return null;
     return session;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 function writeSession(tokenResponse) {
@@ -73,13 +69,7 @@ async function exchangeCodeForToken(code, verifier) {
   const response = await fetch(`${issuer}/oauth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      grant_type: 'authorization_code',
-      client_id: auth0ClientId,
-      code,
-      code_verifier: verifier,
-      redirect_uri: redirectUri,
-    }),
+    body: JSON.stringify({ grant_type: 'authorization_code', client_id: auth0ClientId, code, code_verifier: verifier, redirect_uri: redirectUri }),
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body.error_description || body.error || `Auth0 token exchange failed with HTTP ${response.status}`);
@@ -90,13 +80,11 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(() => readSession());
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState('');
-
   const isConfigured = Boolean(issuer && auth0ClientId && auth0Audience);
 
   useEffect(() => {
     let cancelled = false;
     const finish = () => { if (!cancelled) setIsLoading(false); };
-
     const completeCallback = async () => {
       if (!isConfigured) return finish();
       const params = new URLSearchParams(window.location.search);
@@ -132,36 +120,21 @@ export function AuthProvider({ children }) {
         if (!cancelled) setAuthError(err.message || 'Unable to complete sign in.');
         window.history.replaceState({}, '', '/console');
         window.dispatchEvent(new PopStateEvent('popstate'));
-      } finally {
-        finish();
-      }
+      } finally { finish(); }
     };
-
     completeCallback();
     return () => { cancelled = true; };
   }, [isConfigured]);
 
   const login = async () => {
-    if (!isConfigured) {
-      setAuthError('Auth0 frontend variables are missing. Set VITE_AUTH0_DOMAIN, VITE_CLIENT_ID, and VITE_AUTH0_AUDIENCE in Vercel.');
-      return;
-    }
+    if (!isConfigured) { setAuthError('Auth0 frontend variables are missing. Set VITE_AUTH0_DOMAIN, VITE_CLIENT_ID, and VITE_AUTH0_AUDIENCE.'); return; }
     const state = randomString(32);
     const verifier = randomString(96);
     const challenge = base64UrlEncode(await sha256(verifier));
     sessionStorage.setItem(STATE_KEY, state);
     sessionStorage.setItem(VERIFIER_KEY, verifier);
     sessionStorage.setItem('lethem_return_to', window.location.pathname + window.location.search);
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: auth0ClientId,
-      redirect_uri: redirectUri,
-      scope: 'openid profile email',
-      audience: auth0Audience,
-      state,
-      code_challenge: challenge,
-      code_challenge_method: 'S256',
-    });
+    const params = new URLSearchParams({ response_type: 'code', client_id: auth0ClientId, redirect_uri: redirectUri, scope: 'openid profile email', audience: auth0Audience, state, code_challenge: challenge, code_challenge_method: 'S256' });
     window.location.assign(`${issuer}/authorize?${params.toString()}`);
   };
 

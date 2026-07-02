@@ -1,50 +1,40 @@
-/* ── SVG Icon Components ── */
-/* Clean, minimal icons at 20×20 viewBox, currentColor fill/stroke */
+const ic = (path, viewBox = '0 0 16 16') => function Icon({ width = 15, height = 15, style, className }) {
+  return <svg width={width} height={height} viewBox={viewBox} fill='none' xmlns='http://www.w3.org/2000/svg' style={style} className={className}>{path}</svg>;
+};
 
-const s = { width: 20, height: 20, viewBox: '0 0 20 20', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' };
-
-export const IconOverview = (p) => <svg {...s} {...p}><rect x={2} y={2} width={7} height={7} rx={1.5} /><rect x={11} y={2} width={7} height={7} rx={1.5} /><rect x={2} y={11} width={7} height={7} rx={1.5} /><rect x={11} y={11} width={7} height={7} rx={1.5} /></svg>;
-
-export const IconMasterKey = (p) => <svg {...s} {...p}><path d="M8 17a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" /><path d="M12.5 12.5 18 18" /><path d="m13.5 11.5 1 1" /></svg>;
-
-export const IconSubkey = (p) => <svg {...s} {...p}><path d="M8 15a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" /><path d="M11.5 11.5 16 16" /><path d="M14 4h4v4" /><path d="M12 8.5 18 2.5" /></svg>;
-
-export const IconLogs = (p) => <svg {...s} {...p}><path d="M4 4h12v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4Z" /><path d="M7 2v2" /><path d="M13 2v2" /><path d="M7 8h6" /><path d="M7 11h6" /><path d="M7 14h4" /></svg>;
-
-export const IconDemo = (p) => <svg {...s} {...p}><circle cx={10} cy={10} r={8} /><path d="m8 6 6 4-6 4V6Z" /></svg>;
-
-export const IconHealth = (p) => <svg {...s} {...p}><path d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" /><path d="m5.5 10 2.5 2.5 2.5-2.5" /><path d="M8 12.5V7" /></svg>;
-
-export const IconNotifications = (p) => <svg {...s} {...p}><path d="M10 3a5 5 0 0 0-5 5v3l-1.5 2.5h13L15 11V8a5 5 0 0 0-5-5Z" /><path d="M12 15a2 2 0 1 1-4 0" /></svg>;
-
-export const IconArrowLeft = (p) => <svg {...s} {...p}><path d="M15 10H5" /><path d="m9 6-4 4 4 4" /></svg>;
-
-export const IconCopy = (p) => <svg {...s} {...p}><rect x={6} y={6} width={10} height={10} rx={1.5} /><path d="M4 12V4h8" /></svg>;
-
-export const IconCheck = (p) => <svg {...s} {...p}><path d="M15 6 8 14l-3-3" /></svg>;
-
-export const IconX = (p) => <svg {...s} {...p}><path d="M6 6l8 8M14 6l-8 8" /></svg>;
-
-export const IconMenu = (p) => <svg {...s} {...p}><path d="M3 5h14M3 10h14M3 15h14" /></svg>;
-
-export const IconPlus = (p) => <svg {...s} {...p}><path d="M10 5v10M5 10h10" /></svg>;
-
-export const IconBell = (p) => <svg {...s} {...p}><path d="M10 2a5 5 0 0 0-5 5v3l-2 3h14l-2-3V7a5 5 0 0 0-5-5Z" /><path d="M12 14a2 2 0 1 1-4 0" /></svg>;
-
-export const IconRefresh = (p) => <svg {...s} {...p}><path d="M15 8a6 6 0 0 0-10.3-3.3" /><path d="M17 2v4h-4" /><path d="M5 12a6 6 0 0 0 10.3 3.3" /><path d="M3 18v-4h4" /></svg>;
-
-export const IconTrash = (p) => <svg {...s} {...p}><path d="M4 5h12" /><path d="M7 5V3.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V5" /><path d="M6 5v11a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V5" /></svg>;
-
-export const IconExternal = (p) => <svg {...s} {...p}><path d="M11 3h6v6" /><path d="M17 3 9 11" /><path d="M15 13v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2" /></svg>;
-
-export const IconSearch = (p) => <svg {...s} {...p}><circle cx={9} cy={9} r={4.5} /><path d="m15 15-3.5-3.5" /></svg>;
-
-export const IconAnalytics = (p) => <svg {...s} {...p}><path d="M4 16V9" /><path d="M10 16V4" /><path d="M16 16v-6" /><path d="M3 16h14" /></svg>;
-
-export const IconTeam = (p) => <svg {...s} {...p}><path d="M7.5 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" /><path d="M2.5 17a5 5 0 0 1 10 0" /><path d="M14 10a2.5 2.5 0 1 0 0-5" /><path d="M14.5 13c1.5.5 2.6 1.8 3 4" /></svg>;
-
-export const IconBilling = (p) => <svg {...s} {...p}><rect x={3} y={5} width={14} height={10} rx={2} /><path d="M3 8h14" /><path d="M6 12h3" /></svg>;
-
-export const IconSettings = (p) => <svg {...s} {...p}><path d="M8.5 3h3l.5 2 1.8.8 1.8-1 1.5 2.6-1.6 1.2.1 1.4 1.5 1.2-1.5 2.6-1.8-1-1.8.8-.5 2h-3l-.5-2-1.8-.8-1.8 1-1.5-2.6L5 10l-.1-1.4-1.5-1.2 1.5-2.6 1.8 1 1.8-.8.5-2Z" /><circle cx={10} cy={10} r={2.5} /></svg>;
-
-export const IconUser = (p) => <svg {...s} {...p}><circle cx={10} cy={6.5} r={3} /><path d="M4 17a6 6 0 0 1 12 0" /></svg>;
+export const IconHome = ic(<path d='M2 6.5L8 2l6 4.5V14H10v-3H6v3H2V6.5z' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />);
+export const IconKey = ic(<path d='M11 1a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM6.5 8.5L2 13v1h2v-1.5h1.5V11H7l-.5-.5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />);
+export const IconKeys = ic(<><path d='M11 1a3 3 0 1 1 0 6 3 3 0 0 1 0-6z' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /><path d='M6.5 8.5L2 13v1h2v-1.5h1.5V11H7l-.5-.5M13 3.5h1.5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /></>);
+export const IconActivity = ic(<path d='M1 8h3l2-5 2 10 2-5 1.5 3H15' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />);
+export const IconLog = ic(<><path d='M3 2h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z' stroke='currentColor' strokeWidth='1.5' /><path d='M5 6h6M5 9h4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconAnalytics = ic(<><rect x='2' y='9' width='3' height='5' rx='1' stroke='currentColor' strokeWidth='1.5' /><rect x='6.5' y='5.5' width='3' height='8.5' rx='1' stroke='currentColor' strokeWidth='1.5' /><rect x='11' y='2' width='3' height='12' rx='1' stroke='currentColor' strokeWidth='1.5' /></>);
+export const IconBell = ic(<><path d='M8 1a5 5 0 0 1 5 5v4l1 2H2l1-2V6a5 5 0 0 1 5-5z' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /><path d='M6.5 13a1.5 1.5 0 0 0 3 0' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconTerminal = ic(<><rect x='2' y='2' width='12' height='12' rx='2' stroke='currentColor' strokeWidth='1.5' /><path d='M5 6l2.5 2.5L5 11M9.5 11h2' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /></>);
+export const IconHeart = ic(<><path d='M8 13S2 9.5 2 5.5A3.5 3.5 0 0 1 8 3.9 3.5 3.5 0 0 1 14 5.5C14 9.5 8 13 8 13z' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /></>);
+export const IconCreditCard = ic(<><rect x='2' y='4' width='12' height='9' rx='1.5' stroke='currentColor' strokeWidth='1.5' /><path d='M2 7h12M5 10.5h2' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconUser = ic(<><circle cx='8' cy='5.5' r='2.5' stroke='currentColor' strokeWidth='1.5' /><path d='M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconUsers = ic(<><circle cx='6' cy='5.5' r='2' stroke='currentColor' strokeWidth='1.5' /><path d='M2 14c0-2.2 1.8-4 4-4s4 1.8 4 4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /><path d='M11 2c1.1 0 2 .9 2 2s-.9 2-2 2M13.5 12c.3 0 .5-.2.5-.5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /><path d='M11 8.5c1.5 0 2.5 1.2 2.5 2.5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconShield = ic(<><path d='M8 2L3 4v4c0 3 2.2 5.5 5 6.5 2.8-1 5-3.5 5-6.5V4L8 2z' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /></>);
+export const IconUserPlus = ic(<><circle cx='7' cy='5.5' r='2.5' stroke='currentColor' strokeWidth='1.5' /><path d='M2 14c0-2.8 2.2-5 5-5s5 2.2 5 5M13 6v4M11 8h4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconSettings = ic(<><circle cx='8' cy='8' r='2.5' stroke='currentColor' strokeWidth='1.5' /><path d='M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M2.9 2.9l1 1M12.1 12.1l1 1M2.9 13.1l1-1M12.1 3.9l1-1' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconFolder = ic(<><path d='M2 5a1 1 0 0 1 1-1h4l1.5 2H13a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /></>);
+export const IconGrid = ic(<><rect x='2' y='2' width='5' height='5' rx='1' stroke='currentColor' strokeWidth='1.5' /><rect x='9' y='2' width='5' height='5' rx='1' stroke='currentColor' strokeWidth='1.5' /><rect x='2' y='9' width='5' height='5' rx='1' stroke='currentColor' strokeWidth='1.5' /><rect x='9' y='9' width='5' height='5' rx='1' stroke='currentColor' strokeWidth='1.5' /></>);
+export const IconLogout = ic(<><path d='M10.5 11l3-3-3-3M13.5 8H6M7 2H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /></>);
+export const IconPlus = ic(<path d='M8 3v10M3 8h10' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' />);
+export const IconChevronDown = ic(<path d='M4 6l4 4 4-4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />);
+export const IconChevronRight = ic(<path d='M6 4l4 4-4 4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />);
+export const IconChevronLeft = ic(<path d='M10 4l-4 4 4 4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />);
+export const IconCopy = ic(<><rect x='5' y='5' width='8' height='9' rx='1.5' stroke='currentColor' strokeWidth='1.5' /><path d='M3 11V3h8' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /></>);
+export const IconCheck = ic(<path d='M3 8l3.5 3.5L13 5' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' />);
+export const IconRefresh = ic(<path d='M2 8A6 6 0 0 1 13.8 6M14 8a6 6 0 0 1-11.8 2M2 8V5M14 8v3' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />);
+export const IconX = ic(<path d='M4 4l8 8M12 4l-8 8' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' />);
+export const IconDot = ic(<circle cx='8' cy='8' r='3' fill='currentColor' />);
+export const IconExternalLink = ic(<><path d='M7 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V9' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /><path d='M10 2h4v4M14 2l-6 6' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /></>);
+export const IconSearch = ic(<><circle cx='7' cy='7' r='4' stroke='currentColor' strokeWidth='1.5' /><path d='M11 11l3 3' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconEye = ic(<><path d='M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /><circle cx='8' cy='8' r='2' stroke='currentColor' strokeWidth='1.5' /></>);
+export const IconEyeOff = ic(<><path d='M2 2l12 12M9.9 9.9A2 2 0 0 1 6.1 6.1' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /><path d='M5 4.1A6.5 6.5 0 0 0 1 8s2.5 5 7 5a6.3 6.3 0 0 0 3.5-1.1M11.6 11.6A6.5 6.5 0 0 0 15 8s-2.5-5-7-5c-.6 0-1.1.1-1.7.2' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconAlertTriangle = ic(<><path d='M8 3L1 14h14L8 3z' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /><path d='M8 7v3M8 12.5v.5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconInfo = ic(<><circle cx='8' cy='8' r='6' stroke='currentColor' strokeWidth='1.5' /><path d='M8 7.5V11M8 5v.5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconDownload = ic(<><path d='M8 3v8M5 8l3 3 3-3' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /><path d='M3 13h10' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
+export const IconMenu = ic(<path d='M2 4h12M2 8h12M2 12h12' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' />);
+export const IconInbox = ic(<><path d='M2 10h3l1.5 2h3L11 10h3V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-3z' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' /><path d='M4 6h8M4 3h8' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' /></>);
