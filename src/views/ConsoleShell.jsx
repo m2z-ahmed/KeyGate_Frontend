@@ -1,103 +1,142 @@
-import { useEffect, useRef } from 'react';
+import { useLethem } from '../contexts/LethemContext';
 import Sidebar from '../components/parts/Sidebar';
 import ConsoleHeader from '../components/parts/ConsoleHeader';
 import OverviewPage from '../components/pages/OverviewPage';
 import MasterKeysPage from '../components/pages/MasterKeysPage';
 import SubkeysPage from '../components/pages/SubkeysPage';
 import LogsPage from '../components/pages/LogsPage';
-import AnalyticsPage from '../components/pages/AnalyticsPage';
 import DemoPage from '../components/pages/DemoPage';
-import NotificationsPage from '../components/pages/NotificationsPage';
 import HealthPage from '../components/pages/HealthPage';
+import NotificationsPage from '../components/pages/NotificationsPage';
 import BillingPage from '../components/pages/BillingPage';
 import ProfilePage from '../components/pages/ProfilePage';
 import WorkspacePage from '../components/pages/WorkspacePage';
+import PlaceholderPage from '../components/pages/PlaceholderPage';
+import AnalyticsPage from '../components/pages/AnalyticsPage';
+import UsagePage from '../components/pages/UsagePage';
 import DangerPage from '../components/pages/DangerPage';
 import MembersPage from '../components/pages/MembersPage';
 import RolesPage from '../components/pages/RolesPage';
 import InvitesPage from '../components/pages/InvitesPage';
-import UsagePage from '../components/pages/UsagePage';
-import PlaceholderPage from '../components/pages/PlaceholderPage';
-import { useLethem } from '../contexts/LethemContext';
 
-function Notification({ notif }) {
-  if (!notif?.show) return null;
+const PLACEHOLDER_PAGES = new Set(['invoices', 'general', 'endpoint', 'security', 'audit', 'docs']);
+
+
+function AccountSidebar({ page, navigate, onBack, drawerOpen = false, setDrawerOpen = () => {} }) {
+  const items = [
+    ['profile', 'Profile'],
+    ['workspace', 'Workspace Settings'],
+    ['subscription', 'Billing'],
+    ['docs', 'Documentation'],
+  ];
+
+  const go = (key) => {
+    navigate(key);
+    setDrawerOpen(false);
+  };
+
+  const content = (mobile = false) => (
+    <nav className={mobile ? 'mobile-drawer-list' : 'nav'}>
+      <button className={mobile ? 'mobile-drawer-item' : 'nav-item'} onClick={() => { onBack(); setDrawerOpen(false); }}>← Back to console</button>
+      <div className={mobile ? 'mobile-drawer-section' : 'nav-section'}>
+        <div className='nav-label'>Account</div>
+        {items.map(([key, label]) => (
+          <button key={key} className={`${mobile ? 'mobile-drawer-item' : 'nav-item'} ${page === key || (page === 'billing' && key === 'subscription') ? 'active' : ''}`} onClick={() => go(key)}>{label}</button>
+        ))}
+      </div>
+    </nav>
+  );
+
   return (
-    <div className={`toast toast-${notif.type}`}>
-      <span>{notif.msg}</span>
-    </div>
+    <>
+      <aside className='sidebar account-sidebar'>
+        {content(false)}
+      </aside>
+      <div className={`mobile-drawer-backdrop ${drawerOpen ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setDrawerOpen(false)}>
+        <aside className='mobile-drawer account-mobile-drawer'>
+          <div className='mobile-drawer-title'>Account</div>
+          {content(true)}
+        </aside>
+      </div>
+    </>
   );
 }
 
-function PageShell({ page, ctx, go, projectSlug, accountMode, billing, selectedProject, deleteProject, setProjectToDelete }) {
-  if (accountMode) {
-    if (page === 'profile') return <ProfilePage ctx={ctx} />;
-    if (page === 'workspace') return <WorkspacePage ctx={ctx} />;
-    if (page === 'billing') return <BillingPage ctx={ctx} onBack={() => go?.('/console')} />;
-    if (page === 'usage') return <UsagePage ctx={ctx} billing={billing} />;
-    return <PlaceholderPage type={page} onBack={() => go?.('/console')} />;
-  }
+const PAGES = {
+  overview: OverviewPage,
+  masterkeys: MasterKeysPage,
+  subkeys: SubkeysPage,
+  logs: LogsPage,
+  demo: DemoPage,
+  health: HealthPage,
+  notifications: NotificationsPage,
+  billing: BillingPage,
+  subscription: BillingPage,
+  profile: ProfilePage,
+  workspace: WorkspacePage,
+  analytics: AnalyticsPage,
+  usage: UsagePage,
+  danger: DangerPage,
+  members: MembersPage,
+  roles: RolesPage,
+  invites: InvitesPage,
+};
 
-  if (page === 'overview') return <OverviewPage ctx={ctx} />;
-  if (page === 'masterkeys') return <MasterKeysPage ctx={ctx} />;
-  if (page === 'subkeys') return <SubkeysPage ctx={ctx} />;
-  if (page === 'logs') return <LogsPage ctx={ctx} />;
-  if (page === 'analytics') return <AnalyticsPage ctx={ctx} />;
-  if (page === 'demo') return <DemoPage ctx={ctx} />;
-  if (page === 'notifications') return <NotificationsPage ctx={ctx} />;
-  if (page === 'health') return <HealthPage ctx={ctx} />;
-  if (page === 'billing') return <BillingPage ctx={ctx} />;
-  if (page === 'usage') return <UsagePage ctx={ctx} billing={billing} />;
-  if (page === 'members') return <MembersPage ctx={ctx} />;
-  if (page === 'roles') return <RolesPage ctx={ctx} />;
-  if (page === 'invites') return <InvitesPage ctx={ctx} />;
-  if (page === 'danger') return <DangerPage ctx={ctx} selectedProject={selectedProject} deleteProject={deleteProject} setProjectToDelete={setProjectToDelete} />;
-  return <PlaceholderPage type={page} />;
-}
+export default function ConsoleShell({ go, page, projectSlug, accountMode = false }) {
+  const { ctx, projects, selectedProject, mobileMenuOpen, setMobileMenuOpen, notif, deleteProject, setProjectToDelete } = useLethem();
+  const accountProject = selectedProject || { name: 'Account', slug: 'user subscription' };
 
-export default function ConsoleShell({ go, page, projectSlug, accountMode }) {
-  const lethem = useLethem();
-  const { ctx, notif, selectedProject, deleteProject, setProjectToDelete } = lethem || {};
-  const mainRef = useRef(null);
-
-  useEffect(() => { if (mainRef.current) mainRef.current.scrollTop = 0; }, [page]);
-
-  const navigate = (p) => {
-    if (accountMode) go?.(`/console/${p}`);
-    else go?.(`/console/${projectSlug}/${p}`);
+  const navigate = (p) => accountMode ? go(`/console/${p}`) : go(`/console/${projectSlug}/${p}`);
+  const getAccountBackPath = () => {
+    const fromState = window.history.state?.from;
+    let fromStored = '';
+    try { fromStored = sessionStorage.getItem('lethem_last_console_path') || ''; } catch (_) {}
+    const fallback = selectedProject?.slug ? `/console/${selectedProject.slug}/overview` : '/console';
+    const target = fromState || fromStored || fallback;
+    return /^\/console(\/|$)/.test(target) && !/^\/console\/(subscription|billing|profile|workspace|docs)(\/|$)/.test(target) ? target : fallback;
   };
+  const goAccountBack = () => go(getAccountBackPath());
+  const PageComponent = PAGES[page];
 
   return (
-    <div className='app'>
-      <Sidebar
-        page={page}
-        navigate={navigate}
-        go={go}
-        projectSlug={projectSlug}
-        accountMode={accountMode}
-      />
-      <div className='main' ref={mainRef}>
+    <>
+      <div className={`app ${accountMode ? 'account-mode' : ''}`}>
         <ConsoleHeader
           page={page}
-          projectSlug={projectSlug}
-          go={go}
-          accountMode={accountMode}
+          selectedProject={accountProject}
+          projectSlug={accountMode ? 'account' : projectSlug}
+          onSwitchProject={() => go('/console')}
+          onOpenMobileMenu={() => setMobileMenuOpen((open) => !open)}
+          onOpenNotifications={() => navigate('notifications')}
+          mobileMenuOpen={mobileMenuOpen}
+          navigate={navigate}
         />
-        <div className='page-content'>
-          <PageShell
+        {accountMode ? (
+          <AccountSidebar page={page} navigate={navigate} onBack={goAccountBack} drawerOpen={mobileMenuOpen} setDrawerOpen={setMobileMenuOpen} />
+        ) : (
+          <Sidebar
             page={page}
-            ctx={ctx}
-            go={go}
-            projectSlug={projectSlug}
-            accountMode={accountMode}
-            billing={ctx?.billing}
-            selectedProject={selectedProject}
-            deleteProject={deleteProject}
-            setProjectToDelete={setProjectToDelete}
+            navigate={navigate}
+            onBackToConsole={() => go('/console')}
+            drawerOpen={mobileMenuOpen}
+            setDrawerOpen={setMobileMenuOpen}
           />
-        </div>
+        )}
+        <main className='main'>
+          <div key={page} className='page-transition'>
+            {PLACEHOLDER_PAGES.has(page) ? (
+              <PlaceholderPage type={page} />
+            ) : PageComponent && (
+              page === 'overview'
+                ? <OverviewPage navigate={navigate} ctx={ctx} />
+                : page === 'usage' ? <UsagePage ctx={{ ...ctx, projects }} billing={ctx.billing} />
+                : page === 'danger' ? <DangerPage ctx={ctx} selectedProject={selectedProject} deleteProject={deleteProject} setProjectToDelete={setProjectToDelete} />
+                : <PageComponent ctx={ctx} onBack={accountMode ? null : goAccountBack} />
+            )}
+          </div>
+        </main>
       </div>
-      <Notification notif={notif} />
-    </div>
+      <div className={`notif ${notif.show ? 'show' : ''} ${notif.type}`}>{notif.msg}</div>
+    </>
   );
 }

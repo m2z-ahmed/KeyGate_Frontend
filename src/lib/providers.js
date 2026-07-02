@@ -5,9 +5,19 @@ export const FALLBACK_PROVIDERS = [
   { id: 'deepseek', label: 'DeepSeek', default_model: 'deepseek-chat', key_placeholder: 'sk-...', models: [{ id: 'deepseek-chat', label: 'DeepSeek Chat' }, { id: 'deepseek-reasoner', label: 'DeepSeek Reasoner' }] },
   { id: 'xai', label: 'xAI / Grok', default_model: 'grok-3', key_placeholder: 'xai-...', models: [{ id: 'grok-3', label: 'Grok 3' }, { id: 'grok-3-mini', label: 'Grok 3 Mini' }, { id: 'grok-2-vision', label: 'Grok 2 Vision' }] },
   { id: 'groq', label: 'Groq', default_model: 'llama-3.1-8b-instant', key_placeholder: 'gsk_...', models: [
+    { id: 'allam-2-7b', label: 'Allam 2 7B' },
+    { id: 'canopylabs/orpheus-arabic-saudi', label: 'Orpheus Arabic Saudi' },
+    { id: 'canopylabs/orpheus-v1-english', label: 'Orpheus V1 English' },
+    { id: 'groq/compound', label: 'Groq Compound' },
+    { id: 'groq/compound-mini', label: 'Groq Compound Mini' },
     { id: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B Instant' },
     { id: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B Versatile' },
     { id: 'meta-llama/llama-4-scout-17b-16e-instruct', label: 'Llama 4 Scout 17B' },
+    { id: 'meta-llama/llama-prompt-guard-2-22m', label: 'Llama Prompt Guard 22M' },
+    { id: 'meta-llama/llama-prompt-guard-2-86m', label: 'Llama Prompt Guard 86M' },
+    { id: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B' },
+    { id: 'openai/gpt-oss-20b', label: 'GPT-OSS 20B' },
+    { id: 'openai/gpt-oss-safeguard-20b', label: 'GPT-OSS Safeguard 20B' },
     { id: 'qwen/qwen3-32b', label: 'Qwen 3 32B' },
   ] },
 ];
@@ -20,6 +30,8 @@ export const providerDefaultModel = (providers, id) => (providers || FALLBACK_PR
 export function parseAllowedModels(value) {
   if (!value || value === 'all') return ['all'];
   if (Array.isArray(value)) return value.length ? value : ['all'];
-  if (typeof value === 'string') { try { return parseAllowedModels(JSON.parse(value)); } catch { return [value]; } }
+  if (typeof value === 'string') {
+    try { return parseAllowedModels(JSON.parse(value)); } catch { return [value]; }
+  }
   return ['all'];
 }

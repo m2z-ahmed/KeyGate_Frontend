@@ -59,7 +59,11 @@ export default function LethemProvider({ children, projectSlug, page }) {
     const method = (opts.method || 'GET').toUpperCase();
     const isRead = method === 'GET';
     const noCache = Boolean(opts.noCache);
-    const headers = { ...(hasBody ? { 'Content-Type': 'application/json' } : {}), ...(projectSlug ? { 'x-project-id': projectSlug } : {}), ...opts.headers };
+    const headers = {
+      ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
+      ...(projectSlug ? { 'x-project-id': projectSlug } : {}),
+      ...opts.headers
+    };
     const skipAuth = Boolean(opts.skipAuth || opts.headers?.Authorization);
     const cacheScope = skipAuth ? 'public' : (user?.sub || 'anonymous');
     if (!skipAuth && isAuthenticated) {
@@ -67,52 +71,190 @@ export default function LethemProvider({ children, projectSlug, page }) {
       const idToken = await getIdToken();
       if (idToken) headers['x-lethem-id-token'] = idToken;
     }
-    delete opts.skipAuth; delete opts.noCache;
-    if (isRead && !noCache) { const cached = cacheGet(path, cacheScope); if (cached !== null) return cached; }
+    delete opts.skipAuth;
+    delete opts.noCache;
+
+    // Return cached GET data if fresh
+    if (isRead && !noCache) {
+      const cached = cacheGet(path, cacheScope);
+      if (cached !== null) return cached;
+    }
+
     const res = await fetch(API + path, { ...opts, method, headers, body: hasBody ? JSON.stringify(opts.body) : undefined });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) { const err = new Error(data?.error?.message || data?.error || `HTTP ${res.status}`); err.code = data?.error?.code || null; throw err; }
-    if (isRead) { if (!noCache) cacheSet(path, data, cacheScope); } else { cacheBustAfterMutation(path, cacheScope); }
+    if (!res.ok) {
+      const err = new Error(data?.error?.message || data?.error || `HTTP ${res.status}`);
+      err.code = data?.error?.code || null;
+      throw err;
+    }
+
+    // Cache successful reads; bust only real mutations. noCache GETs bypass storage without invalidating.
+    if (isRead) {
+      if (!noCache) cacheSet(path, data, cacheScope);
+    } else {
+      cacheBustAfterMutation(path, cacheScope);
+    }
+
     return data;
   };
 
-  const loadProviders = async () => { const res = await api('/api/providers', { skipAuth: true }); setProviders(res.providers || []); return res.providers || []; };
+  const loadProviders = async () => {
+    const res = await api('/api/providers', { skipAuth: true });
+    setProviders(res.providers || []);
+    return res.providers || [];
+  };
+
   const acceptPendingInviteToken = async () => {
     let token = '';
     try { token = sessionStorage.getItem('lethem_pending_invite_token') || ''; } catch (_) {}
     if (!token) return null;
-    try { const res = await api('/api/invites/accept', { method: 'POST', body: { token } }); notify('Invite accepted'); return res; }
-    finally { try { sessionStorage.removeItem('lethem_pending_invite_token'); } catch (_) {} }
+    try {
+      const res = await api('/api/invites/accept', { method: 'POST', body: { token } });
+      notify('Invite accepted');
+      return res;
+    } finally {
+      try { sessionStorage.removeItem('lethem_pending_invite_token'); } catch (_) {}
+    }
   };
-  const loadAccount = async () => { const data = await api('/api/me', { noCache: true }); setAccount(data); return data; };
-  const updateAccount = async (updates) => { const data = await api('/api/me', { method: 'PATCH', body: updates }); setAccount((current) => ({ ...(current || {}), ...data })); return data; };
-  const loadProjects = async () => { await acceptPendingInviteToken().catch((e) => notify(e.message, 'error')); const rows = await api('/api/projects', { noCache: true }); setProjects(rows); return rows; };
+
+  const loadAccount = async () => {
+    const data = await api('/api/me', { noCache: true });
+    setAccount(data);
+    return data;
+  };
+
+  const updateAccount = async (updates) => {
+    const data = await api('/api/me', { method: 'PATCH', body: updates });
+    setAccount((current) => ({ ...(current || {}), ...data }));
+    return data;
+  };
+
+  const loadProjects = async () => {
+    await acceptPendingInviteToken().catch((e) => notify(e.message, 'error'));
+    const rows = await api('/api/projects', { noCache: true });
+    setProjects(rows);
+    return rows;
+  };
+
   const loadBilling = async ({ refresh = false } = {}) => {
     if (refresh) cacheBust('/api/billing/plans', user?.sub || 'anonymous');
     const data = await api('/api/billing/plans', { noCache: true });
     setBilling(data);
     try {
-      const detailOnly = { currentPlan: data.currentPlan, subscriptionId: data.subscriptionId, subscriptionStatus: data.subscriptionStatus, currency: data.currency, testMode: data.testMode, plan: (data.plans || []).find((plan) => plan.id === data.currentPlan) || null };
+      const detailOnly = {
+        currentPlan: data.currentPlan,
+        subscriptionId: data.subscriptionId,
+        subscriptionStatus: data.subscriptionStatus,
+        currency: data.currency,
+        testMode: data.testMode,
+        plan: (data.plans || []).find((plan) => plan.id === data.currentPlan) || null,
+      };
       localStorage.setItem('lethem_subscription_details', JSON.stringify(detailOnly));
     } catch (_) {}
     return data;
   };
+
   const loadOverview = async () => {
     setLoading((v) => ({ ...v, overview: true }));
-    try { const [sks, an] = await Promise.all([api('/api/subkeys'), api('/api/analytics')]); setSubkeys(sks); setLogs(an.logs || []); setAnalytics(an); setLoading((v) => ({ ...v, logs: false })); }
-    finally { setLoading((v) => ({ ...v, overview: false })); }
+    try {
+      const [sks, an] = await Promise.all([api('/api/subkeys'), api('/api/analytics')]);
+      setSubkeys(sks);
+      setLogs(an.logs || []);
+      setAnalytics(an);
+      setLoading((v) => ({ ...v, logs: false }));
+    } finally {
+      setLoading((v) => ({ ...v, overview: false }));
+    }
   };
-  const loadMasterKeys = async () => { setLoading((v) => ({ ...v, masterkeys: true })); try { setMasterKeys(await api('/api/master-keys')); } finally { setLoading((v) => ({ ...v, masterkeys: false })); } };
-  const loadSubkeys = async () => { setLoading((v) => ({ ...v, subkeys: true })); try { setSubkeys(await api('/api/subkeys')); } finally { setLoading((v) => ({ ...v, subkeys: false })); } };
-  const loadLogs = async () => { setLoading((v) => ({ ...v, logs: true })); try { const an = await api('/api/analytics'); setLogs(an.logs || []); setAnalytics(an); } finally { setLoading((v) => ({ ...v, logs: false })); } };
-  const loadMembers = async () => { setTeamLoading(true); try { const rows = await api('/api/members', { noCache: true }); setMembers(rows); return rows; } finally { setTeamLoading(false); } };
-  const loadInvites = async () => { setTeamLoading(true); try { const rows = await api('/api/invites', { noCache: true }); setInvites(rows); return rows; } finally { setTeamLoading(false); } };
-  const checkInvitee = async (email) => { try { return await api('/api/invites/check', { method: 'POST', body: { email } }); } catch (err) { if (String(err.message || '').toLowerCase().includes('not found')) { return api(`/api/invites/check?email=${encodeURIComponent(email)}`, { noCache: true }); } throw err; } };
-  const inviteMember = async (email, role) => { const res = await api('/api/invites', { method: 'POST', body: { email, role } }); notify(res.user_exists ? 'In-app invite sent' : 'Email invite sent'); await Promise.all([loadMembers().catch(() => []), loadInvites().catch(() => [])]); return res; };
-  const acceptInvite = async (inviteId) => { const res = await api('/api/invites/accept', { method: 'POST', body: { inviteId } }); notify('Invite accepted'); await Promise.all([loadProjects().catch(() => []), loadInvites().catch(() => [])]); return res; };
-  const updateMemberRole = async (userId, role) => { const res = await api(`/api/members/${encodeURIComponent(userId)}`, { method: 'PATCH', body: { role } }); notify('Member role updated'); await loadMembers(); return res; };
-  const removeMember = async (userId) => { const res = await api(`/api/members/${encodeURIComponent(userId)}`, { method: 'DELETE' }); notify('Member removed'); await loadMembers(); return res; };
-  const revokeInvite = async (inviteId) => { const res = await api(`/api/invites/${encodeURIComponent(inviteId)}`, { method: 'DELETE' }); notify('Invite revoked'); await loadInvites(); return res; };
+
+  const loadMasterKeys = async () => {
+    setLoading((v) => ({ ...v, masterkeys: true }));
+    try { setMasterKeys(await api('/api/master-keys')); }
+    finally { setLoading((v) => ({ ...v, masterkeys: false })); }
+  };
+
+  const loadSubkeys = async () => {
+    setLoading((v) => ({ ...v, subkeys: true }));
+    try { setSubkeys(await api('/api/subkeys')); }
+    finally { setLoading((v) => ({ ...v, subkeys: false })); }
+  };
+
+  const loadLogs = async () => {
+    setLoading((v) => ({ ...v, logs: true }));
+    try {
+      const an = await api('/api/analytics');
+      setLogs(an.logs || []);
+      setAnalytics(an);
+    } finally {
+      setLoading((v) => ({ ...v, logs: false }));
+    }
+  };
+
+  const loadMembers = async () => {
+    setTeamLoading(true);
+    try { const rows = await api('/api/members', { noCache: true }); setMembers(rows); return rows; }
+    finally { setTeamLoading(false); }
+  };
+
+  const loadInvites = async () => {
+    setTeamLoading(true);
+    try { const rows = await api('/api/invites', { noCache: true }); setInvites(rows); return rows; }
+    finally { setTeamLoading(false); }
+  };
+
+  const checkInvitee = async (email) => {
+    try {
+      return await api('/api/invites/check', { method: 'POST', body: { email } });
+    } catch (err) {
+      if (String(err.message || '').toLowerCase().includes('not found')) {
+        return api(`/api/invites/check?email=${encodeURIComponent(email)}`, { noCache: true });
+      }
+      throw err;
+    }
+  };
+
+  const inviteMember = async (email, role) => {
+    const res = await api('/api/invites', { method: 'POST', body: { email, role } });
+    notify(res.user_exists ? 'In-app invite sent' : 'Email invite sent');
+    await Promise.all([loadMembers().catch(() => []), loadInvites().catch(() => [])]);
+    return res;
+  };
+
+  const acceptInvite = async (inviteId) => {
+    const res = await api('/api/invites/accept', { method: 'POST', body: { inviteId } });
+    notify('Invite accepted');
+    await Promise.all([loadProjects().catch(() => []), loadInvites().catch(() => [])]);
+    return res;
+  };
+
+  const updateMemberRole = async (userId, role) => {
+    const res = await api(`/api/members/${encodeURIComponent(userId)}`, { method: 'PATCH', body: { role } });
+    notify('Member role updated');
+    await loadMembers();
+    return res;
+  };
+
+  const removeMember = async (userId) => {
+    const res = await api(`/api/members/${encodeURIComponent(userId)}`, { method: 'DELETE' });
+    notify('Member removed');
+    await loadMembers();
+    return res;
+  };
+
+  const revokeInvite = async (inviteId) => {
+    const res = await api(`/api/invites/${encodeURIComponent(inviteId)}`, { method: 'DELETE' });
+    notify(res.deleted ? 'Invite deleted' : 'Invite revoked');
+    await loadInvites();
+    return res;
+  };
+
+  const deleteInvite = async (inviteId) => {
+    const res = await api(`/api/invites/${encodeURIComponent(inviteId)}`, { method: 'DELETE' });
+    notify(res.deleted ? 'Invite deleted' : 'Invite revoked');
+    await loadInvites();
+    return res;
+  };
+
   const createProject = async (name) => {
     const projectLimit = billing?.plans?.find((plan) => plan.id === billing.currentPlan)?.limits?.projects ?? 3;
     if (projectLimit !== null && projects.length >= projectLimit) { notify(`Maximum ${projectLimit} projects allowed on your current plan`, 'error'); return null; }
@@ -120,15 +262,26 @@ export default function LethemProvider({ children, projectSlug, page }) {
     await loadProjects();
     return p;
   };
+
   const deleteProject = async (targetProject = projectToDelete) => {
     if (!targetProject) return;
     const ref = encodeURIComponent(targetProject.slug || targetProject.id);
-    const attempts = [{ path: `/api/projects/by-slug/${ref}`, method: 'DELETE' }, { path: `/api/projects/${encodeURIComponent(targetProject.id)}`, method: 'DELETE' }];
+    const attempts = [
+      { path: `/api/projects/by-slug/${ref}`, method: 'DELETE' },
+      { path: `/api/projects/${encodeURIComponent(targetProject.id)}`, method: 'DELETE' },
+    ];
     let deleted = false;
-    for (const attempt of attempts) { try { const data = await api(attempt.path, { method: attempt.method }); if (data?.success !== false) { deleted = true; break; } } catch (_) {} }
+    for (const attempt of attempts) {
+      try {
+        const data = await api(attempt.path, { method: attempt.method });
+        if (data?.success !== false) { deleted = true; break; }
+      } catch (_) {}
+    }
     if (!deleted) throw new Error('Failed to delete project');
     cacheBust('/api/projects', user?.sub || 'anonymous');
-    setDeleteConfirm(''); setProjectToDelete(null); notify('Project deleted');
+    setDeleteConfirm('');
+    setProjectToDelete(null);
+    notify('Project deleted');
     const ps = await loadProjects();
     return ps;
   };
@@ -142,15 +295,22 @@ export default function LethemProvider({ children, projectSlug, page }) {
     if (page === 'logs') loadLogs().catch((e) => notify(e.message, 'error'));
     if (page === 'members') loadMembers().catch((e) => notify(e.message, 'error'));
     if (page === 'invites') loadInvites().catch((e) => notify(e.message, 'error'));
-    if (page === 'demo' || page === 'notifications') { loadSubkeys().catch((e) => notify(e.message, 'error')); setLoading((v) => ({ ...v, subkeys: true })); }
+    if (page === 'demo' || page === 'notifications') {
+      loadSubkeys().catch((e) => notify(e.message, 'error'));
+      setLoading((v) => ({ ...v, subkeys: true }));
+    }
   }, [page, projectSlug]);
 
+  // Reset subkey loading when data arrives for demo/notifications
   useEffect(() => {
     if (page === 'members') loadMembers().catch((e) => notify(e.message, 'error'));
     if (page === 'invites') loadInvites().catch((e) => notify(e.message, 'error'));
-    if (page === 'demo' || page === 'notifications') { if (subkeys.length > 0) setLoading((v) => ({ ...v, subkeys: false })); }
+    if (page === 'demo' || page === 'notifications') {
+      if (subkeys.length > 0) setLoading((v) => ({ ...v, subkeys: false }));
+    }
   }, [subkeys, page]);
 
+  // Auto-refresh on tab focus — catches external API requests
   useEffect(() => {
     const onVisible = () => {
       if (document.visibilityState !== 'visible') return;
@@ -169,7 +329,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
     API, providers, loadProviders, fmtNum, fmtTime, fmtDate, quotaColor, sleep,
     api, notify, copyText, modal, setModal, revealedToken, setRevealedToken,
     loadMasterKeys, loadSubkeys, loadLogs, loadOverview, loadBilling, loadMembers, loadInvites, loadAccount, updateAccount,
-    checkInvitee, inviteMember, acceptInvite, updateMemberRole, removeMember, revokeInvite,
+    checkInvitee, inviteMember, acceptInvite, updateMemberRole, removeMember, revokeInvite, deleteInvite,
     subkeys, setSubkeys, masterKeys, logs, analytics, billing, setBilling, members, invites, teamLoading, account, setAccount, page, loading, copiedItem,
     selectedProject: projects.find((p) => p.slug === projectSlug || p.id === projectSlug),
   }), [modal, subkeys, masterKeys, logs, analytics, billing, members, invites, teamLoading, account, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub, projects]);
@@ -182,7 +342,9 @@ export default function LethemProvider({ children, projectSlug, page }) {
     mobileMenuOpen, setMobileMenuOpen,
     notif,
     createProject, deleteProject, loadProviders, loadProjects, loadBilling, loadAccount, updateAccount, account, notify, acceptPendingInviteToken,
-    filteredProjects: projects.filter((p) => `${p.name} ${p.slug} ${p.id}`.toLowerCase().includes(projectSearch.toLowerCase())),
+    filteredProjects: projects.filter((p) =>
+      `${p.name} ${p.slug} ${p.id}`.toLowerCase().includes(projectSearch.toLowerCase())
+    ),
     selectedProject: projects.find((p) => p.slug === projectSlug || p.id === projectSlug),
   }), [ctx, projects, projectName, projectSearch, projectToDelete, deleteConfirm, showPlanBanner, mobileMenuOpen, notif, projectSlug, account]);
 

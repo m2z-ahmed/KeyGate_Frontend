@@ -5,12 +5,22 @@ export default function HealthPage({ ctx, publicMode = false }) {
   const [rows, setRows] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => { api('/api/health').then(setRows).catch(() => setRows([])); }, []);
+  useEffect(() => {
+    api('/api/health').then(setRows).catch(() => setRows([]));
+  }, []);
 
-  const dayKey = (d) => { const dt = new Date(d); return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`; };
+  const dayKey = (d) => {
+    const dt = new Date(d);
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
   const byDay = new Map(rows.map((r) => [dayKey(r.day), r]));
   const bars = Array.from({ length: 90 }).map((_, idx) => {
-    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (89 - idx));
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - (89 - idx));
     const key = dayKey(d);
     return byDay.get(key) || { day: key, internal_ok: null, db_ok: null, redis_ok: null, details: { missing_record: true } };
   });
@@ -29,38 +39,27 @@ export default function HealthPage({ ctx, publicMode = false }) {
       const data = await api('/api/health');
       setRows(data);
       notify('Health refreshed');
-    } catch (e) { notify(e.message || 'Failed to refresh health', 'error'); }
-    finally { setRefreshing(false); }
+    } catch (e) {
+      notify(e.message || 'Failed to refresh health', 'error');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
-  return (
-    <div className='page active'>
-      <div className='page-inner'>
-        <div className='page-header'>
-          <div className='page-title'>System Health</div>
-          <div className='page-sub'>Public status page for internal server, database, and redis.</div>
-        </div>
-        <div className='card' style={{ background: summaryBg }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div className='card-title'>Current status: {summary}</div>
-            {!publicMode && <button className='btn btn-ghost btn-sm' disabled={refreshing} onClick={refreshNow}>{refreshing ? 'Refreshing...' : 'Refresh now'}</button>}
-          </div>
-        </div>
-        <div className='card'>
-          <div className='card-title' style={{ marginBottom: 10 }}>Uptime over last 90 days ({pct}%)</div>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 12, fontSize: 12, color: 'var(--muted)', flexWrap: 'wrap' }}>
-            {[['#2dca72','Operational'],['#ffb547','Degraded'],['#ff5252','Down'],['#4b5563','No data']].map(([c,l]) => (
-              <span key={l}><span style={{ display: 'inline-block', width: 10, height: 10, background: c, borderRadius: 2, marginRight: 6 }} />{l}</span>
-            ))}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(90, 1fr)', gap: 3 }}>
-            {bars.map((r, i) => (
-              <div key={i} title={`${r.day}\nInternal: ${r.internal_ok === null ? 'N/A' : (r.internal_ok ? 'OK' : 'FAIL')}\nDB: ${r.db_ok === null ? 'N/A' : (r.db_ok ? 'OK' : 'FAIL')}\nRedis: ${r.redis_ok === null ? 'N/A' : (r.redis_ok ? 'OK' : 'FAIL')}`}
-                style={{ height: 28, borderRadius: 3, background: colorFor(r) }} />
-            ))}
-          </div>
-        </div>
+  return <div className='page active'><div style={{ padding: '32px 36px' }}>
+    <div className='page-header'><div className='page-title'>System Health</div><div className='page-sub'>Public status page for internal server, database, and redis.</div></div>
+    <div className='card' style={{background:summaryBg}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10,flexWrap:'wrap'}}><div className='card-title'>Current status: {summary}</div>{!publicMode && <button className='btn btn-ghost btn-sm' disabled={refreshing} onClick={refreshNow}>{refreshing ? 'Refreshing...' : 'Refresh now'}</button>}</div></div>
+    <div className='card'>
+      <div className='card-title' style={{marginBottom:10}}>Uptime over last 90 days ({pct}%)</div>
+      <div style={{display:'flex',gap:12,marginBottom:12,fontSize:12,color:'var(--muted)'}}>
+        <span><span style={{display:'inline-block',width:10,height:10,background:'#2dca72',borderRadius:2,marginRight:6}} />Operational</span>
+        <span><span style={{display:'inline-block',width:10,height:10,background:'#ffb547',borderRadius:2,marginRight:6}} />Degraded</span>
+        <span><span style={{display:'inline-block',width:10,height:10,background:'#ff5252',borderRadius:2,marginRight:6}} />Down</span>
+        <span><span style={{display:'inline-block',width:10,height:10,background:'#4b5563',borderRadius:2,marginRight:6}} />No data</span>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(90,1fr)',gap:3}}>
+        {bars.map((r, i) => <div key={i} title={`${r.day}\nInternal: ${r.internal_ok === null ? 'N/A' : (r.internal_ok ? 'OK' : 'FAIL')}\nDB: ${r.db_ok === null ? 'N/A' : (r.db_ok ? 'OK' : 'FAIL')}\nRedis: ${r.redis_ok === null ? 'N/A' : (r.redis_ok ? 'OK' : 'FAIL')}\nDetails: ${JSON.stringify(r.details || {})}`} style={{height:28, borderRadius:3, background:colorFor(r)}} />)}
       </div>
     </div>
-  );
+  </div></div>;
 }
