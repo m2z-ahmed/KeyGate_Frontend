@@ -19,10 +19,13 @@
 </p>
 
 </div>
+
 ---
+
 <p align="center">
   <img src="./og-image.png" alt="Lethem Dashboard" width="100%">
 </p>
+
 ---
 
 ## Overview
