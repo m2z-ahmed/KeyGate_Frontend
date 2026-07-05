@@ -2,59 +2,44 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLethem } from '../contexts/LethemContext';
 import { useAuth } from '../contexts/AuthContext';
 import { LogoIcon } from '../components/parts/Logo';
+import { Button, Card, Input, Label, Modal, Badge, Skeleton, EmptyState, Toast, cn } from '../components/kit';
+import { fmtNum, fmtDate } from '../contexts/LethemContext';
 import { cacheGet, cacheSet } from '../lib/cache';
-import { IconBell, IconBilling, IconCheck, IconDemo, IconExternal, IconLogs, IconPlus, IconSearch, IconSettings, IconSubkey, IconTrash, IconUser } from '../components/parts/Icons';
+import { Plus, Search, Trash2, FolderKanban, Bell, LogOut, ChevronDown, X, ArrowRight, Check, Sparkles, Building2, KeyRound, Zap, Activity } from 'lucide-react';
 
 export default function ProjectSelectView({ go }) {
   const {
-    projects, projectSearch, setProjectSearch,
-    filteredProjects, showPlanBanner, setShowPlanBanner,
-    projectToDelete, setProjectToDelete,
-    deleteConfirm, setDeleteConfirm, deleteProject,
-    notif, notify, account, updateAccount,
+    projects, projectSearch, setProjectSearch, filteredProjects,
+    showPlanBanner, setShowPlanBanner, projectToDelete, setProjectToDelete,
+    deleteConfirm, setDeleteConfirm, deleteProject, notif, notify,
+    account, updateAccount,
     ctx: { API, fmtDate, fmtNum, billing, subkeys, masterKeys, analytics, copyText, copiedItem, invites, loadInvites, acceptInvite, revokeInvite, api },
   } = useLethem();
   const { user, logout, getAccessToken, isAuthenticated } = useAuth();
+
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [accountUsage, setAccountUsage] = useState({ subkeys: 0, masterKeys: 0, tokens: 0, requests: 0, loading: false });
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [accountUsage, setAccountUsage] = useState({ subkeys: 0, masterKeys: 0, tokens: 0, requests: 0, loading: false });
   const [quotaRequests, setQuotaRequests] = useState([]);
-  const [selectedInvite, setSelectedInvite] = useState(null);
   const [notificationBusy, setNotificationBusy] = useState('');
-  const [notificationsSeenKey, setNotificationsSeenKey] = useState('');
-  const notificationWrapRef = useRef(null);
-  const onboardingCacheScope = user?.sub || 'anonymous';
-  const onboardingDismissedKey = '/console-page/getting-started-dismissed';
-  const [hideOnboarding, setHideOnboarding] = useState(() => Boolean(cacheGet(onboardingDismissedKey, onboardingCacheScope)));
+  const [hideOnboarding, setHideOnboarding] = useState(false);
   const [setupStep, setSetupStep] = useState('name');
   const [setupSaving, setSetupSaving] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
   const authName = user?.name && user.name !== user.email ? user.name : '';
   const [setupName, setSetupName] = useState(authName || 'Lethem User');
   const [setupWorkspaceName, setSetupWorkspaceName] = useState('My Workspace');
+  const notifWrapRef = useRef(null);
+  const onboardingCacheScope = user?.sub || 'anonymous';
 
-  const currentPlan = billing?.plans?.find((plan) => plan.id === billing.currentPlan) || billing?.plans?.find((plan) => plan.id === 'free');
+  const currentPlan = billing?.plans?.find((p) => p.id === billing.currentPlan) || billing?.plans?.find((p) => p.id === 'free');
   const limits = currentPlan?.limits || {};
   const projectLimit = limits.projects ?? 3;
-  const subkeyLimit = limits.subkeys ?? 20;
-  const tokenLimit = limits.tokens ?? 2000000;
-  const projectLimitLabel = projectLimit == null ? 'Unlimited' : projectLimit;
-  const subkeyLimitLabel = subkeyLimit == null ? 'Unlimited' : subkeyLimit;
-  const tokenLimitLabel = tokenLimit == null ? 'Unlimited' : fmtNum(tokenLimit);
-  const activeProjectSlug = projects[0]?.slug || projects[0]?.id || '';
-  const goProjectPage = (page) => activeProjectSlug ? go(`/console/${activeProjectSlug}/${page}`) : go('/console/new');
-  const displayedSubkeys = Math.max(accountUsage.subkeys, subkeys.length);
-  const displayedMasterKeys = Math.max(accountUsage.masterKeys, masterKeys.length);
-  const tokenUsage = Math.max(accountUsage.tokens, analytics?.totalTokens || 0);
-  const requestCount = Math.max(accountUsage.requests, analytics?.totalRequests || 0, analytics?.logs?.length || 0);
   const isAtProjectLimit = projectLimit != null && projects.length >= projectLimit;
   const userLabel = user?.name || user?.email || 'Signed in';
-  const avatar = userLabel.charAt(0).toUpperCase();
-  const avatarImage = user?.picture || '';
-  const pendingInvites = (invites || []).filter((invite) => invite.direction === 'received' && invite.can_accept);
-  const pendingQuotaRequests = quotaRequests.filter((request) => request.status === 'pending');
-  const notificationCount = pendingInvites.length + pendingQuotaRequests.length;
-  const notificationSignature = `${pendingInvites.map((invite) => invite.id).sort().join(',')}|${pendingQuotaRequests.map((request) => request.id).sort().join(',')}`;
-  const hasNewNotifications = notificationCount > 0 && notificationsSeenKey !== notificationSignature;
+  const avatar = (userLabel).charAt(0).toUpperCase();
+  const pendingInvites = (invites || []).filter((i) => i.direction === 'received' && i.can_accept);
+  const notificationCount = pendingInvites.length + quotaRequests.filter((r) => r.status === 'pending').length;
   const needsSetup = account && !account.user?.onboarding_completed_at;
 
   useEffect(() => {
@@ -63,39 +48,15 @@ export default function ProjectSelectView({ go }) {
     setSetupWorkspaceName(account.organization?.name || 'My Workspace');
   }, [account?.user?.name, account?.organization?.name, authName]);
 
-  const saveSetupName = async (skip = false) => {
-    setSetupSaving(true);
-    try {
-      const name = skip ? 'Lethem User' : (setupName.trim() || 'Lethem User');
-      await updateAccount({ name });
-      setSetupStep('workspace');
-    } catch (e) {
-      notify(e.message || 'Unable to save your name', 'error');
-    } finally { setSetupSaving(false); }
-  };
-
-  const saveSetupWorkspace = async (skip = false) => {
-    setSetupSaving(true);
-    try {
-      const workspaceName = skip ? 'My Workspace' : (setupWorkspaceName.trim() || 'My Workspace');
-      await updateAccount({ workspaceName, onboardingCompleted: true });
-      setSetupStep('greet');
-      setTimeout(() => go('/console'), 1200);
-    } catch (e) {
-      notify(e.message || 'Unable to save your workspace', 'error');
-    } finally { setSetupSaving(false); }
-  };
-
-
   const loadNotificationData = async () => {
     await loadInvites?.().catch(() => []);
     if (!projects.length) { setQuotaRequests([]); return []; }
     const results = await Promise.allSettled(projects.map(async (project) => {
       const projectId = project.slug || project.id;
       const rows = await api('/api/quota-requests', { noCache: true, headers: { 'x-project-id': projectId } });
-      return (Array.isArray(rows) ? rows : []).map((request) => ({ ...request, project_id: projectId, project_name: project.name }));
+      return (Array.isArray(rows) ? rows : []).map((r) => ({ ...r, project_id: projectId, project_name: project.name }));
     }));
-    const rows = results.flatMap((result) => result.status === 'fulfilled' ? result.value : []);
+    const rows = results.flatMap((r) => r.status === 'fulfilled' ? r.value : []);
     setQuotaRequests(rows);
     return rows;
   };
@@ -106,325 +67,212 @@ export default function ProjectSelectView({ go }) {
   }, [isAuthenticated, projects]);
 
   useEffect(() => {
-    const key = `lethem_notifications_seen:${user?.sub || 'anonymous'}`;
-    try { setNotificationsSeenKey(localStorage.getItem(key) || ''); } catch (_) { setNotificationsSeenKey(''); }
-  }, [user?.sub]);
-
-  useEffect(() => {
-    if (!notificationsOpen) return undefined;
-    const onPointerDown = (event) => {
-      if (!notificationWrapRef.current?.contains(event.target)) setNotificationsOpen(false);
-    };
-    document.addEventListener('mousedown', onPointerDown);
-    return () => document.removeEventListener('mousedown', onPointerDown);
+    if (!notificationsOpen) return;
+    const onDown = (e) => { if (!notifWrapRef.current?.contains(e.target)) setNotificationsOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
   }, [notificationsOpen]);
 
-  const toggleNotifications = async () => {
-    const nextOpen = !notificationsOpen;
-    setNotificationsOpen(nextOpen);
-    if (nextOpen) {
-      await loadNotificationData().catch(() => {});
-      const key = `lethem_notifications_seen:${user?.sub || 'anonymous'}`;
-      try { localStorage.setItem(key, notificationSignature); } catch (_) {}
-      setNotificationsSeenKey(notificationSignature);
-    }
-  };
+  // Aggregate account usage across all projects (real backend data)
+  useEffect(() => {
+    const fallback = { subkeys: subkeys.length, masterKeys: masterKeys.length, tokens: analytics?.totalTokens || 0, requests: analytics?.totalRequests || analytics?.logs?.length || 0 };
+    if (!projects.length || !isAuthenticated) { setAccountUsage((c) => ({ ...c, ...fallback })); return; }
+    const cacheScope = user?.sub || 'anonymous';
+    const summaryKey = (project) => `/console-page/project/${project.slug || project.id}/summary`;
+    const cached = projects.map((p) => cacheGet(summaryKey(p), cacheScope));
+    const total = cached.reduce((t, s) => { if (!s) return t; t.subkeys += Number(s.subkeys || 0); t.masterKeys += Number(s.masterKeys || 0); t.tokens += Number(s.tokens || 0); t.requests += Number(s.requests || 0); return t; }, { subkeys: 0, masterKeys: 0, tokens: 0, requests: 0 });
+    if (cached.every(Boolean)) { setAccountUsage({ ...total, loading: false }); return; }
+    setAccountUsage((c) => ({ ...c, loading: true }));
+    let cancelled = false;
+    (async () => {
+      const fetchJson = async (project, path) => {
+        const token = await getAccessToken(); const pid = project.slug || project.id;
+        const res = await fetch(`${API}${path}`, { headers: { Authorization: `Bearer ${token}`, 'x-project-id': pid } });
+        if (!res.ok) return null; return res.json().catch(() => null);
+      };
+      await Promise.allSettled(projects.map(async (project, idx) => {
+        if (cached[idx]) return cached[idx];
+        const [s, m, an] = await Promise.all([fetchJson(project, '/api/subkeys'), fetchJson(project, '/api/master-keys'), fetchJson(project, '/api/analytics')]);
+        const summary = { subkeys: Array.isArray(s) ? s.length : 0, masterKeys: Array.isArray(m) ? m.length : 0, tokens: an?.totalTokens || 0, requests: an?.totalRequests || an?.logs?.length || 0 };
+        cacheSet(summaryKey(project), summary, cacheScope);
+        return summary;
+      }));
+      if (cancelled) return;
+      const refreshed = projects.map((p) => cacheGet(summaryKey(p), cacheScope)).filter(Boolean);
+      const sum = refreshed.reduce((t, s) => { t.subkeys += Number(s.subkeys || 0); t.masterKeys += Number(s.masterKeys || 0); t.tokens += Number(s.tokens || 0); t.requests += Number(s.requests || 0); return t; }, { subkeys: 0, masterKeys: 0, tokens: 0, requests: 0 });
+      setAccountUsage({ ...sum, loading: false });
+    })();
+    return () => { cancelled = true; };
+  }, [projects, isAuthenticated]);
 
-  const decideQuotaRequest = async (request, status) => {
-    const key = `quota:${request.id}`;
-    setNotificationBusy(key);
-    try {
-      await api(`/api/quota-requests/${request.id}`, { method: 'PATCH', body: { status }, headers: { 'x-project-id': request.project_id } });
-      notify(status === 'approved' ? 'Quota request approved' : 'Quota request rejected');
-      await loadNotificationData();
-    } catch (e) { notify(e.message || 'Unable to update quota request', 'error'); }
-    finally { setNotificationBusy(''); }
+  const saveSetupName = async (skip = false) => {
+    setSetupSaving(true);
+    try { await updateAccount({ name: skip ? 'Lethem User' : (setupName.trim() || 'Lethem User') }); setSetupStep('workspace'); }
+    catch (e) { notify(e.message || 'Unable to save your name', 'error'); }
+    finally { setSetupSaving(false); }
+  };
+  const saveSetupWorkspace = async (skip = false) => {
+    setSetupSaving(true);
+    try { await updateAccount({ workspaceName: skip ? 'My Workspace' : (setupWorkspaceName.trim() || 'My Workspace'), onboardingCompleted: true }); setSetupStep('greet'); setTimeout(() => go('/console'), 1200); }
+    catch (e) { notify(e.message || 'Unable to save your workspace', 'error'); }
+    finally { setSetupSaving(false); }
   };
 
   const decideInvite = async (invite, action) => {
-    const key = `invite:${invite.id}`;
-    setNotificationBusy(key);
-    try {
-      if (action === 'accept') await acceptInvite(invite.id);
-      if (action === 'reject') await revokeInvite(invite.id);
-      setSelectedInvite(null);
-      await loadNotificationData();
-    } catch (e) { notify(e.message || 'Unable to update invite', 'error'); }
+    const k = `invite:${invite.id}`; setNotificationBusy(k);
+    try { if (action === 'accept') await acceptInvite(invite.id); if (action === 'reject') await revokeInvite(invite.id); await loadNotificationData(); }
+    catch (e) { notify(e.message || 'Unable to update invite', 'error'); }
     finally { setNotificationBusy(''); }
   };
 
+  const confirmDelete = async () => {
+    setDeleteBusy(true);
+    try { await deleteProject(projectToDelete); setProjectToDelete(null); }
+    catch (e) { notify(e.message || 'Failed to delete project', 'error'); }
+    finally { setDeleteBusy(false); }
+  };
 
-  useEffect(() => {
-    const fallbackUsage = {
-      subkeys: subkeys.length,
-      masterKeys: masterKeys.length,
-      tokens: analytics?.totalTokens || 0,
-      requests: analytics?.totalRequests || analytics?.logs?.length || 0,
-    };
-
-    if (!projects.length || !isAuthenticated) {
-      setAccountUsage((current) => ({ ...current, ...fallbackUsage }));
-      return undefined;
-    }
-
-    const cacheScope = user?.sub || 'anonymous';
-    const summaryKey = (project) => `/console-page/project/${project.slug || project.id}/summary`;
-    const cachedSummaries = projects.map((project) => cacheGet(summaryKey(project), cacheScope));
-    const cachedTotal = cachedSummaries.reduce((totals, summary) => {
-      if (!summary) return totals;
-      totals.subkeys += Number(summary.subkeys || 0);
-      totals.masterKeys += Number(summary.masterKeys || 0);
-      totals.tokens += Number(summary.tokens || 0);
-      totals.requests += Number(summary.requests || 0);
-      return totals;
-    }, { subkeys: 0, masterKeys: 0, tokens: 0, requests: 0 });
-
-    if (cachedSummaries.every(Boolean)) {
-      setAccountUsage({ ...cachedTotal, loading: false });
-      return undefined;
-    }
-
-    if (cachedSummaries.some(Boolean)) setAccountUsage({ ...cachedTotal, loading: true });
-    else setAccountUsage((current) => ({ ...current, loading: true }));
-
-    let cancelled = false;
-
-    const fetchProjectJson = async (project, path) => {
-      const token = await getAccessToken();
-      const projectId = project.slug || project.id;
-      const res = await fetch(`${API}${path}`, { headers: { Authorization: `Bearer ${token}`, 'x-project-id': projectId } });
-      if (!res.ok) return null;
-      return res.json().catch(() => null);
-    };
-
-    Promise.allSettled(projects.map(async (project, index) => {
-      const cached = cachedSummaries[index];
-      if (cached) return cached;
-
-      const [projectSubkeys, projectMasterKeys, projectAnalytics] = await Promise.all([
-        fetchProjectJson(project, '/api/subkeys'),
-        fetchProjectJson(project, '/api/master-keys'),
-        fetchProjectJson(project, '/api/analytics'),
-      ]);
-      const logs = projectAnalytics?.logs || [];
-      const summary = {
-        subkeys: Array.isArray(projectSubkeys) ? projectSubkeys.length : 0,
-        masterKeys: Array.isArray(projectMasterKeys) ? projectMasterKeys.length : 0,
-        tokens: Number(projectAnalytics?.totalTokens || logs.reduce((sum, log) => sum + Number(log.tokens || log.total_tokens || 0), 0)),
-        requests: Number(projectAnalytics?.totalRequests || logs.length || 0),
-      };
-      cacheSet(summaryKey(project), summary, cacheScope);
-      return summary;
-    }))
-      .then((results) => {
-        if (cancelled) return;
-        const next = results.reduce((totals, result) => {
-          if (result.status !== 'fulfilled') return totals;
-          totals.subkeys += Number(result.value.subkeys || 0);
-          totals.masterKeys += Number(result.value.masterKeys || 0);
-          totals.tokens += Number(result.value.tokens || 0);
-          totals.requests += Number(result.value.requests || 0);
-          return totals;
-        }, { subkeys: 0, masterKeys: 0, tokens: 0, requests: 0 });
-        setAccountUsage({ ...next, loading: false });
-      })
-      .catch(() => {
-        if (!cancelled) setAccountUsage((current) => ({ ...current, ...fallbackUsage, loading: false }));
-      });
-
-    return () => { cancelled = true; };
-  }, [API, analytics?.logs, analytics?.totalRequests, analytics?.totalTokens, getAccessToken, isAuthenticated, masterKeys.length, projects, subkeys.length, user?.sub]);
-
-  const expectedDeleteText = projectToDelete ? `delete ${projectToDelete.slug}` : '';
-  const canDeleteProject = projectToDelete && deleteConfirm.trim() === expectedDeleteText;
-
-  const onboardingSteps = useMemo(() => [
-    { label: 'Create account', done: true },
-    { label: 'Create first project', done: projects.length > 0 },
-    { label: 'Add provider API key', done: displayedMasterKeys > 0, onClick: () => goProjectPage('masterkeys') },
-    { label: 'Create first subkey', done: displayedSubkeys > 0, onClick: () => goProjectPage('subkeys') },
-    { label: 'Make first API request', done: requestCount > 0, onClick: () => goProjectPage('demo') },
-  ], [displayedMasterKeys, displayedSubkeys, projects.length, requestCount, activeProjectSlug]);
-  const completedSteps = onboardingSteps.filter((step) => step.done).length;
-  const onboardingPercent = (completedSteps / onboardingSteps.length) * 100;
-
-  const planMeters = [
-    { label: 'Projects', used: projects.length, limit: projectLimit },
-    { label: 'Subkeys', used: displayedSubkeys, limit: subkeyLimit },
-    { label: 'Tokens', used: tokenUsage, limit: tokenLimit },
+  const stats = [
+    { label: 'Projects', value: projects.length, icon: FolderKanban, limit: projectLimit },
+    { label: 'Subkeys', value: accountUsage.subkeys, icon: KeyRound },
+    { label: 'Tokens used', value: fmtNum(accountUsage.tokens), icon: Zap },
+    { label: 'Requests', value: fmtNum(accountUsage.requests), icon: Activity },
   ];
 
-  useEffect(() => {
-    const cached = Boolean(cacheGet(onboardingDismissedKey, onboardingCacheScope));
-    if (cached) setHideOnboarding(true);
-  }, [onboardingCacheScope]);
-
-  useEffect(() => {
-    if (completedSteps === onboardingSteps.length) {
-      cacheSet(onboardingDismissedKey, true, onboardingCacheScope);
-      setHideOnboarding(true);
-    }
-  }, [completedSteps, onboardingSteps.length, onboardingCacheScope]);
-
-  const dismissOnboarding = () => {
-    cacheSet(onboardingDismissedKey, true, onboardingCacheScope);
-    setHideOnboarding(true);
-  };
-
-  const handleDelete = async () => {
-    if (!canDeleteProject || !projectToDelete) return;
-    try {
-      const ps = await deleteProject();
-      if (!ps.length) go('/console/new'); else go('/console');
-    } catch (e) {
-      notify(e.message || 'Failed to delete project', 'error');
-    }
-  };
-
   return (
-    <div className='page active console-select-page'>
-
-      {needsSetup && (
-        <div className='modal-backdrop open onboarding-wizard-backdrop'>
-          <div className='modal onboarding-wizard' role='dialog' aria-modal='true' aria-label='Get Started onboarding'>
-            {setupStep === 'name' && <>
-              <div className='onboarding-kicker'>Get Started</div>
-              <div className='modal-title'>What should we call you?</div>
-              <p className='card-sub'>We prefilled this from your sign-in profile when available. You can edit it now.</p>
-              <div className='field'><label>Name</label><input value={setupName} onChange={(e) => setSetupName(e.target.value)} placeholder='Lethem User' autoFocus /></div>
-              <div className='modal-footer'><button className='btn btn-ghost' disabled={setupSaving} onClick={() => saveSetupName(true)}>Skip</button><button className='btn btn-primary' disabled={setupSaving} onClick={() => saveSetupName(false)}>Continue</button></div>
-            </>}
-            {setupStep === 'workspace' && <>
-              <div className='onboarding-kicker'>Workspace</div>
-              <div className='modal-title'>Name your workspace</div>
-              <p className='card-sub'>This is the shared home for your projects and API access settings.</p>
-              <div className='field'><label>Workspace name</label><input value={setupWorkspaceName} onChange={(e) => setSetupWorkspaceName(e.target.value)} placeholder='My Workspace' autoFocus /></div>
-              <div className='modal-footer'><button className='btn btn-ghost' disabled={setupSaving} onClick={() => saveSetupWorkspace(true)}>Skip</button><button className='btn btn-primary' disabled={setupSaving} onClick={() => saveSetupWorkspace(false)}>Finish</button></div>
-            </>}
-            {setupStep === 'greet' && <div className='onboarding-greet'><div className='onboarding-kicker'>You're all set</div><div className='modal-title'>Welcome, {(setupName || 'Lethem User').trim()}!</div><p className='card-sub'>Taking you to your console.</p></div>}
-          </div>
-        </div>
-      )}
-
-      {selectedInvite && (
-        <div className='modal-backdrop open invite-notification-backdrop' onClick={(e) => e.target === e.currentTarget && setSelectedInvite(null)}>
-          <div className='modal invite-notification-modal'>
-            <div className='modal-title'>Project invite</div>
-            <div className='invite-detail-grid'><span><b>Project</b>{selectedInvite.project_name || selectedInvite.organization_name || 'Project'}</span><span><b>Workspace</b>{selectedInvite.organization_name || 'Workspace'}</span><span><b>Sent by</b>{selectedInvite.invited_by_name || selectedInvite.invited_by_email || 'A teammate'}</span><span><b>Role</b>{selectedInvite.role}</span><span><b>Expires</b>{fmtDate(selectedInvite.expires_at)}</span></div>
-            <div className='modal-footer'><button className='btn btn-green' disabled={notificationBusy === `invite:${selectedInvite.id}`} onClick={() => decideInvite(selectedInvite, 'accept')}>Accept</button><button className='btn btn-danger' disabled={notificationBusy === `invite:${selectedInvite.id}`} onClick={() => decideInvite(selectedInvite, 'reject')}>Reject</button><button className='btn btn-ghost' onClick={() => setSelectedInvite(null)}>Close</button></div>
-          </div>
-        </div>
-      )}
-
-      <nav className='project-console-nav'>
-        <div className='project-console-brand'><span><LogoIcon size={18} /></span><div><strong>Lethem</strong><small>Projects Console</small></div></div>
-        <div className='project-console-nav-actions'>
-          <div className='notification-popover-wrap' ref={notificationWrapRef}>
-            <button className={`project-console-icon-btn notification-bell ${hasNewNotifications ? 'has-new' : ''}`} type='button' aria-label='Notifications' aria-expanded={notificationsOpen} onClick={toggleNotifications}><IconBell />{hasNewNotifications && <span className='notification-dot' />}</button>
-            {notificationsOpen && <div className='notification-popover-panel' role='dialog' aria-label='Notifications panel'>
-              <div className='notification-popover-head'><strong>Notifications</strong><span>{notificationCount ? `${notificationCount} new` : 'All caught up'}</span></div>
-              {notificationCount === 0 ? <div className='notification-empty'>No important notifications right now.</div> : <div className='notification-list'>
-                {pendingInvites.map((invite) => <div className='notification-item' key={`invite-${invite.id}`}>
-                  <div><b>Project invite</b><p>{invite.project_name || invite.organization_name || 'Project'} invited you as {invite.role}.</p></div>
-                  <button className='btn btn-sm btn-ghost' onClick={() => setSelectedInvite(invite)}>View</button>
-                </div>)}
-                {pendingQuotaRequests.map((request) => <div className='notification-item' key={`quota-${request.id}`}>
-                  <div><b>Quota request</b><p>{request.project_name || 'Project'} · {request.subkey_name || 'Subkey'} asked for {request.request_type}{request.amount ? ` (${request.amount})` : ''}.</p></div>
-                  <span className='notification-actions'><button className='btn btn-sm btn-green' disabled={notificationBusy === `quota:${request.id}`} onClick={() => decideQuotaRequest(request, 'approved')}>Accept</button><button className='btn btn-sm btn-danger' disabled={notificationBusy === `quota:${request.id}`} onClick={() => decideQuotaRequest(request, 'rejected')}>Reject</button></span>
-                </div>)}
-              </div>}
-            </div>}
-          </div>
-          <div className='project-console-user-wrap'>
-            <button className='project-console-user' type='button' aria-haspopup='menu' aria-expanded={userMenuOpen} onClick={() => setUserMenuOpen((open) => !open)}><span>{avatarImage ? <img src={avatarImage} alt='' /> : avatar}</span>{userLabel}</button>
-            {userMenuOpen && <div className='project-console-user-menu' role='menu'>
-              <button type='button' role='menuitem' onClick={() => { setUserMenuOpen(false); go('/console/profile'); }}><IconUser /> Profile</button>
-              <button type='button' role='menuitem' onClick={() => { setUserMenuOpen(false); go('/console/workspace'); }}><IconSettings /> Workspace Settings</button>
-              <button type='button' role='menuitem' onClick={() => { setUserMenuOpen(false); go('/console/subscription'); }}><IconBilling /> Billing</button>
-              <button type='button' role='menuitem' onClick={() => { setUserMenuOpen(false); go('/console/docs'); }}><IconLogs /> Documentation</button>
-              <button type='button' role='menuitem' className='danger' onClick={() => { setUserMenuOpen(false); logout(); }}>Logout</button>
-            </div>}
-          </div>
-        </div>
-      </nav>
-
-      <div className='console-select-content'>
-        <header className='console-landing-header project-console-hero'>
-          <div>
-            <h1>Projects Console</h1>
-            <p>Create, switch, and manage isolated projects</p>
-          </div>
-          <div className='console-top-bar'>
-            <button type='button' className='console-plan-badge project-console-plan-link' onClick={() => go('/console/subscription')} aria-label='Open subscription page'>
-              <span className='console-plan-dot' /> {currentPlan?.name || 'Free'} plan <span>{projects.length} / {projectLimitLabel} projects</span>
+    <div className="dark min-h-screen bg-background text-foreground">
+      {/* Header */}
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-card/70 px-4 backdrop-blur-md sm:px-8">
+        <div className="flex items-center gap-2.5"><LogoIcon size={28} /><div><div className="font-heading text-base font-bold leading-none">Lethem</div><div className="text-[10px] uppercase tracking-[0.1em] text-muted-foreground">Console</div></div></div>
+        <div className="flex items-center gap-1.5">
+          <div className="relative" ref={notifWrapRef}>
+            <button onClick={() => setNotificationsOpen((v) => !v)} className="relative rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+              <Bell size={18} />{notificationCount > 0 && <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">{notificationCount}</span>}
             </button>
-            <button className='btn btn-ghost console-create-btn project-console-manage-btn' onClick={() => go('/console/subscription')}>Manage subscription</button>
-            <button className='btn btn-primary console-create-btn' disabled={isAtProjectLimit} onClick={() => go('/console/new')}>+ New project</button>
+            {notificationsOpen && (
+              <div className="absolute right-0 top-12 z-50 w-80 rounded-xl border border-border bg-popover p-2 shadow-2xl animate-fade-up">
+                <div className="px-3 py-2 text-xs font-semibold text-muted-foreground">Notifications</div>
+                {!pendingInvites.length && !quotaRequests.filter((r) => r.status === 'pending').length ? <div className="px-3 py-6 text-center text-xs text-muted-foreground">You're all caught up.</div> : (
+                  <div className="max-h-80 space-y-1 overflow-y-auto">
+                    {pendingInvites.map((i) => (
+                      <div key={i.id} className="rounded-lg p-2.5 hover:bg-secondary/50">
+                        <div className="text-xs"><span className="font-medium">{i.project_name || i.organization_name}</span> invited you as {i.role}</div>
+                        <div className="mt-1.5 flex gap-1.5">
+                          <Button size="sm" className="h-7 text-xs" disabled={notificationBusy === `invite:${i.id}`} onClick={() => decideInvite(i, 'accept')}><Check size={12} /> Accept</Button>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" disabled={notificationBusy === `invite:${i.id}`} onClick={() => decideInvite(i, 'reject')}><X size={12} /></Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </header>
+          <button onClick={() => setUserMenuOpen((v) => !v)} className="flex items-center gap-2 rounded-lg p-1 pl-1.5 hover:bg-secondary/60 transition-colors">
+            {user?.picture ? <img src={user.picture} alt="" className="h-8 w-8 rounded-full object-cover" /> : <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">{avatar}</span>}
+            <ChevronDown size={14} className="hidden text-muted-foreground sm:block" />
+          </button>
+          {userMenuOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+              <div className="absolute right-4 top-12 z-50 w-56 rounded-xl border border-border bg-popover p-1.5 shadow-2xl animate-fade-up">
+                <div className="border-b border-border px-3 py-2.5 mb-1.5"><div className="truncate text-sm font-medium">{userLabel}</div>{user?.email && user.email !== userLabel && <div className="truncate text-xs text-muted-foreground">{user.email}</div>}</div>
+                <button onClick={() => { setUserMenuOpen(false); go('/console/profile'); }} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">Profile</button>
+                <button onClick={() => { setUserMenuOpen(false); go('/console/subscription'); }} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">Billing</button>
+                <div className="my-1.5 border-t border-border" />
+                <button onClick={() => { setUserMenuOpen(false); logout(); }} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"><LogOut size={15} /> Logout</button>
+              </div>
+            </>
+          )}
+        </div>
+      </header>
 
-        {!hideOnboarding && (
-          <section className='project-console-onboarding card'>
-            <div className='project-console-section-head'><div><strong>✣ Getting Started</strong><span>Complete these steps to get your API gateway running</span></div><div className='onboarding-meta'><b>{completedSteps}/{onboardingSteps.length}<small>Completed</small></b><button type='button' className='onboarding-close' onClick={dismissOnboarding} aria-label='Hide getting started'>✕</button></div></div>
-            <div className='project-console-progress'><span style={{ width: `${onboardingPercent}%` }} /></div>
-            <div className='project-console-steps'>{onboardingSteps.map((step) => { const StepTag = step.onClick ? 'button' : 'div'; return <StepTag type={step.onClick ? 'button' : undefined} className={`${step.done ? 'done' : ''} ${step.onClick ? 'clickable' : 'locked'}`} onClick={step.onClick} key={step.label}><IconCheck />{step.label}</StepTag>; })}</div>
-          </section>
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8">
+        {/* Onboarding setup */}
+        {needsSetup && !hideOnboarding && (
+          <Modal open={!hideOnboarding} onClose={() => setHideOnboarding(true)} title={setupStep === 'name' ? 'Welcome to Lethem' : setupStep === 'workspace' ? 'Name your workspace' : 'You’re all set'}>
+            {setupStep === 'name' && (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">Let’s set up your account. What should we call you?</p>
+                <div><Label>Your name</Label><Input value={setupName} onChange={(e) => setSetupName(e.target.value)} placeholder="Your name" autoFocus /></div>
+                <div className="flex justify-between"><Button variant="ghost" onClick={() => saveSetupName(true)}>Skip</Button><Button onClick={() => saveSetupName(false)} disabled={setupSaving}>Continue <ArrowRight size={15} /></Button></div>
+              </div>
+            )}
+            {setupStep === 'workspace' && (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">Name the workspace for your organization. This is shared across projects and billing.</p>
+                <div><Label>Workspace name</Label><Input value={setupWorkspaceName} onChange={(e) => setSetupWorkspaceName(e.target.value)} placeholder="Acme Workspace" autoFocus /></div>
+                <div className="flex justify-between"><Button variant="ghost" onClick={() => saveSetupWorkspace(true)}>Skip</Button><Button onClick={() => saveSetupWorkspace(false)} disabled={setupSaving}><Building2 size={15} /> {setupSaving ? 'Saving…' : 'Save workspace'}</Button></div>
+              </div>
+            )}
+            {setupStep === 'greet' && <div className="py-6 text-center"><div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success/15 text-success"><Check size={24} /></div><p className="font-heading text-lg font-bold">You’re all set!</p><p className="mt-1 text-sm text-muted-foreground">Redirecting to your console…</p></div>}
+          </Modal>
         )}
 
-        <section className='project-console-actions-wrap'>
-          <h2>Quick Actions</h2>
-          <div className='project-console-actions'>
-            <button onClick={() => go('/console/new')}><IconPlus /><span><strong>Create Project</strong><small>Get started</small></span><IconExternal /></button>
-            <button onClick={() => goProjectPage('masterkeys')}><IconCheck /><span><strong>Add Provider</strong><small>{displayedMasterKeys > 0 ? 'Completed' : 'Get started'}</small></span><IconExternal /></button>
-            <button onClick={() => goProjectPage('subkeys')}><IconSubkey /><span><strong>Create Subkey</strong><small>{displayedSubkeys > 0 ? 'Completed' : 'Get started'}</small></span><IconExternal /></button>
-            <button onClick={() => goProjectPage('demo')}><IconDemo /><span><strong>Open Live Demo</strong><small>{requestCount > 0 ? 'Completed' : 'Get started'}</small></span><IconExternal /></button>
-          </div>
-        </section>
-
-        <section className='project-console-plan card'>
-          <button className='btn btn-ghost btn-sm' onClick={() => go('/console/subscription')}>Upgrade →</button>
-          <div className='card-title'>Plan Usage</div><div className='card-sub'>Resource consumption across your {currentPlan?.name || 'Free'} plan</div>
-          <div className='project-console-meters'>{planMeters.map((meter) => { const pct = meter.limit ? Math.min(100, (meter.used / meter.limit) * 100) : 0; return <div key={meter.label}><p><strong>{meter.label}</strong><span>{fmtNum(meter.used)} / {meter.limit == null ? 'Unlimited' : fmtNum(meter.limit)}</span></p><div><span style={{ width: `${pct}%` }} /></div><small>{meter.limit ? `${Math.round(pct)}% used` : 'No fixed limit'}</small></div>; })}</div>
-        </section>
-
-        <div className={`card projects-banner console-info-banner ${showPlanBanner ? '' : 'hidden'}`}>
-          <div className='console-banner-text'>Your {currentPlan?.name || 'Free'} plan includes {projectLimitLabel} projects and plan-based resources.</div>
-          <button className='btn btn-ghost btn-sm console-banner-link' onClick={() => go('/console/subscription')}>Upgrade to Pro</button>
-          <button className='banner-close' onClick={() => setShowPlanBanner(false)} aria-label='Close banner'>✕</button>
+        {/* Hero */}
+        <div className="mb-8">
+          <h1 className="font-heading text-3xl font-bold tracking-tight text-gradient">Your workspace</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">Select a project to manage its keys, subkeys, logs, and team.</p>
         </div>
 
-        <div className='project-console-projects-head'><h2>Your Projects <span>{projects.length} / {projectLimitLabel}</span></h2><div className='project-console-search'><IconSearch /><input className='projects-search console-search-input' value={projectSearch} onChange={(e) => setProjectSearch(e.target.value)} placeholder='Search by name, label, or ID' /></div></div>
+        {/* Usage stats */}
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {stats.map((s) => (
+            <Card key={s.label} className="p-5">
+              <div className="flex items-center justify-between"><span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{s.label}</span><s.icon size={15} className="text-muted-foreground/60" /></div>
+              <div className="mt-2 font-mono text-2xl font-semibold">{s.loading ? '—' : s.value}{s.limit != null && <span className="ml-1 text-sm text-muted-foreground">/ {s.limit}</span>}</div>
+            </Card>
+          ))}
+        </div>
 
-        <div className='projects-grid console-projects-grid'>
-          {filteredProjects.map((p) => {
-            const projectRef = p.slug || p.id;
-            const copyId = `project-${p.id}`;
-            return (
-              <article key={p.id} className='card project-card console-project-card' role='button' tabIndex={0} onClick={() => go(`/console/${projectRef}/overview`)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') go(`/console/${projectRef}/overview`); }}>
-                <div className='console-project-card-header'><h3>{p.name}</h3><span className={`badge ${p.status === 'active' ? 'active' : 'paused'}`}>• {p.status}</span></div>
-                <div className='console-project-card-body'>
-                  <div className='console-project-id-wrap'>
-                    <div className='console-project-id'>{projectRef}</div>
-                    <button type='button' className='project-id-copy' onClick={(e) => { e.stopPropagation(); copyText(projectRef, copyId); }}>{copiedItem === copyId ? 'Copied' : 'Copy ID'}</button>
-                  </div>
-                  <div className='console-project-date'>Created {fmtDate(p.created_at)}</div>
+        {/* Plan banner */}
+        {showPlanBanner && currentPlan && (
+          <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+            <Sparkles size={18} className="shrink-0 text-primary" />
+            <div className="flex-1 text-sm"><span className="font-semibold">You’re on the {currentPlan.name} plan.</span> <span className="text-muted-foreground">{currentPlan.description || 'Upgrade for more projects, subkeys, and tokens.'}</span></div>
+            <Button variant="ghost" size="sm" onClick={() => go('/console/subscription')}>Manage <ArrowRight size={14} /></Button>
+            <button onClick={() => setShowPlanBanner(false)} className="rounded p-1 text-muted-foreground hover:text-foreground"><X size={15} /></button>
+          </div>
+        )}
+
+        {/* Projects */}
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="font-heading text-lg font-semibold">Projects</h2>
+          <div className="flex items-center gap-2">
+            <div className="relative"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" /><Input value={projectSearch} onChange={(e) => setProjectSearch(e.target.value)} placeholder="Search projects…" className="pl-9 w-full sm:w-64" /></div>
+            <Button onClick={() => go('/console/new')} disabled={isAtProjectLimit}><Plus size={15} /> New</Button>
+          </div>
+        </div>
+
+        {!projects.length ? (
+          <EmptyState icon={FolderKanban} title="No projects yet" description="Create your first project to start managing API keys and subkeys." action={<Button onClick={() => go('/console/new')}><Plus size={15} /> Create project</Button>} />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredProjects.map((p) => (
+              <Card key={p.id || p.slug} className="group relative cursor-pointer p-5 transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5" onClick={() => go(`/console/${p.slug || p.id}/overview`)}>
+                <div className="flex items-start justify-between">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 text-primary"><FolderKanban size={20} /></div>
+                  <button onClick={(e) => { e.stopPropagation(); setProjectToDelete(p); }} className="rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"><Trash2 size={15} /></button>
                 </div>
-                <div className='console-project-card-footer'><span /><button type='button' className='project-delete console-project-delete' onClick={(e) => { e.stopPropagation(); setProjectToDelete(p); setDeleteConfirm(''); }} aria-label={`Delete ${p.name}`}><IconTrash /></button></div>
-              </article>
-            );
-          })}
-        </div>
-
-        <div className={`modal-backdrop ${projectToDelete ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setProjectToDelete(null)}>
-          <div className='modal'>
-            <div className='modal-title'>Delete project</div>
-            <div className='danger-box'>This action is irreversible. All data related to this project will be deleted and issued keys will stop working.</div>
-            <div className='field' style={{ marginTop: 12 }}><label>Type "{expectedDeleteText}" to continue</label><input value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} placeholder='delete project-xxxx' /></div>
-            <div className='modal-footer'><button className='btn btn-ghost' onClick={() => setProjectToDelete(null)}>Cancel</button><button className='btn btn-danger' disabled={!canDeleteProject} onClick={handleDelete}>Delete project permanently</button></div>
+                <h3 className="mt-3 truncate font-heading text-base font-semibold">{p.name}</h3>
+                <code className="font-mono text-xs text-muted-foreground">{p.slug || p.id}</code>
+                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Created {fmtDate(p.created_at)}</span>
+                  <ArrowRight size={14} className="opacity-0 transition-opacity group-hover:opacity-100" />
+                </div>
+              </Card>
+            ))}
           </div>
-        </div>
-        <div className={`notif ${notif.show ? 'show' : ''} ${notif.type}`}>{notif.msg}</div>
+        )}
       </div>
+
+      {/* Delete confirm modal */}
+      <Modal open={Boolean(projectToDelete)} onClose={() => setProjectToDelete(null)} title="Delete project" sub={`Type ${projectToDelete?.name} to confirm. This cannot be undone.`}
+        footer={<><Button variant="ghost" onClick={() => setProjectToDelete(null)}>Cancel</Button><Button variant="danger" onClick={confirmDelete} disabled={deleteConfirm !== projectToDelete?.name || deleteBusy}><Trash2 size={15} /> {deleteBusy ? 'Deleting…' : 'Delete project'}</Button></>}>
+        <Input value={deleteConfirm} onChange={(e) => setDeleteConfirm(e.target.value)} placeholder={projectToDelete?.name} autoFocus />
+      </Modal>
+
+      <Toast notif={notif} />
     </div>
   );
 }

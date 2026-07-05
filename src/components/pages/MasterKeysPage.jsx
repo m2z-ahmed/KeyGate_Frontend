@@ -1,6 +1,10 @@
 import { useState } from 'react';
-import '../styles/MasterKeysPage.css';
+import { Button, Card, CardHeader, Badge, Input, Label, Select, Modal, EmptyState, Skeleton } from '../kit';
 import { FALLBACK_PROVIDERS, providerLabel, providerPlaceholder } from '../../lib/providers';
+import { fmtDate } from '../../contexts/LethemContext';
+import { KeyRound, Plus, Trash2, ShieldCheck, Lock } from 'lucide-react';
+
+const PROVIDER_ICON = { openai: '⬛', google: '🔵', anthropic: '🟧', deepseek: '🌊', xai: '✕', groq: '⚡' };
 
 export default function MasterKeysPage({ ctx }) {
   const { masterKeys, api, loadMasterKeys, notify, fmtDate, modal, setModal, providers = FALLBACK_PROVIDERS, loading, billing } = ctx;
@@ -10,14 +14,11 @@ export default function MasterKeysPage({ ctx }) {
   const [apiKey, setApiKey] = useState('');
   const [deletingId, setDeletingId] = useState('');
   const isLoading = loading?.masterkeys;
-  const currentPlan = billing?.plans?.find((plan) => plan.id === billing.currentPlan) || billing?.plans?.find((plan) => plan.id === 'free');
+  const currentPlan = billing?.plans?.find((p) => p.id === billing.currentPlan) || billing?.plans?.find((p) => p.id === 'free');
   const masterKeyLimit = currentPlan?.limits?.masterKeys ?? null;
-  const atMasterKeyLimit = masterKeyLimit != null && masterKeys.length >= masterKeyLimit;
+  const atLimit = masterKeyLimit != null && masterKeys.length >= masterKeyLimit;
 
-  const onProviderChange = (next) => {
-    setProvider(next);
-    setKeyName(`Primary ${providerLabel(providerOptions, next)} Key`);
-  };
+  const onProviderChange = (next) => { setProvider(next); setKeyName(`Primary ${providerLabel(providerOptions, next)} Key`); };
 
   const saveMasterKey = async () => {
     if (!apiKey.trim()) return notify('Enter an API key', 'error');
@@ -26,35 +27,68 @@ export default function MasterKeysPage({ ctx }) {
   };
 
   const deleteMasterKey = async (mk) => {
-    const okay = window.confirm(`Delete master key "${mk.name || mk.provider}"?\n\nThis cannot be undone. Related subkeys may stop working if they depend on this key.`);
-    if (!okay) return;
+    if (!window.confirm(`Delete master key "${mk.name || mk.provider}"?\n\nThis cannot be undone. Related subkeys may stop working.`)) return;
     setDeletingId(mk.id);
-    try {
-      await api(`/api/master-keys/${mk.id}`, { method: 'DELETE' });
-      notify('Master key deleted');
-      await loadMasterKeys();
-    } finally {
-      setDeletingId('');
-    }
+    try { await api(`/api/master-keys/${mk.id}`, { method: 'DELETE' }); notify('Master key deleted'); await loadMasterKeys(); }
+    finally { setDeletingId(''); }
   };
 
-  return <div className='page active'><div style={{ padding: '32px 36px' }}>
-    <div className='page-header mobile-header-stack' style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}><div><div className='page-title'>Master keys</div><div className='page-sub'>Your real provider API keys — stored encrypted, never exposed</div></div><button className='btn btn-primary' disabled={atMasterKeyLimit} onClick={() => setModal('addkey')}>+ Add key</button></div>
-    <div className='card master-key-limit-notice' style={{ marginBottom: '16px' }}><strong>{masterKeys.length}{masterKeyLimit != null ? ` / ${masterKeyLimit}` : ''} master keys used</strong><span>{atMasterKeyLimit ? 'You reached your plan limit. Upgrade billing to store more provider keys.' : 'Store provider keys for OpenAI, Google/OpenRouter, Anthropic, and more.'}</span></div>
-    <div className='card' style={{ background: '#ffb54708', borderColor: '#ffb54720' }}><div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}><span style={{ fontSize: '18px', flexShrink: 0 }}>⚡</span><div><div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--amber)', marginBottom: '4px' }}>Keys are encrypted at rest</div><div style={{ fontSize: '12px', color: 'var(--muted)', lineHeight: 1.7 }}>Your master keys are encrypted before storage. They are never returned in any API response, never logged, and only injected server-side at request time. Your clients only ever see subkeys.</div></div></div></div>
-    {isLoading ? (
-      <div>
-        {Array.from({length:3}).map((_,i) => <div className='card' key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div className='skel skel-avatar' />
-          <div style={{ flex: 1 }}>
-            <div className='skel skel-block skel-h skel-w40' style={{marginBottom:6}} />
-            <div className='skel skel-block skel-h skel-w60' />
-          </div>
-          <div className='skel skel-block skel-h skel-w20' />
-        </div>)}
+  return (
+    <div>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-gradient">Master keys</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Your real provider API keys — stored encrypted, never exposed</p>
+        </div>
+        <Button onClick={() => setModal('addkey')}><Plus size={15} /> Add key</Button>
       </div>
-    ) : !masterKeys.length ? <div className='empty'><div className='empty-icon'>{'🔑'}</div><div className='empty-text'>No master keys configured</div><button className='btn btn-primary' disabled={atMasterKeyLimit} onClick={() => setModal('addkey')}>Add your first key</button></div> : masterKeys.map((mk) => <div className='card' key={mk.id} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}><div style={{ width: '40px', height: '40px', background: 'var(--bg4)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>{mk.provider === 'openai' ? '⬛' : mk.provider === 'google' ? '🔵' : mk.provider === 'anthropic' ? '🟧' : mk.provider === 'deepseek' ? '🌊' : mk.provider === 'xai' ? '✕' : mk.provider === 'groq' ? '⚡' : '🔐'}</div><div style={{ flex: 1 }}><div style={{ fontSize: '14px', fontWeight: 500, marginBottom: '3px' }}>{mk.name || providerLabel(providerOptions, mk.provider)}</div><div className='token-val' style={{ fontSize: '12px', color: 'var(--muted)' }}>{mk.key_masked}</div></div><div style={{ display:'flex', gap:'8px', alignItems:'center' }}><div style={{ fontSize: '12px', color: 'var(--dim)' }}>Added {fmtDate(mk.created_at)}</div><button className='btn btn-sm btn-danger' disabled={deletingId === mk.id} onClick={() => deleteMasterKey(mk)}>{deletingId === mk.id ? 'Deleting...' : <><span className='mobile-delete-icon' aria-hidden='true'>🗑️</span> Delete</>}</button></div><span style={{ fontSize: '11px', background: '#2dca7215', color: 'var(--green)', padding: '3px 9px', borderRadius: '20px' }}>{providerLabel(providerOptions, mk.provider)}</span></div>)}
 
-    <div className={`modal-backdrop ${modal === 'addkey' ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setModal('')}><div className='modal'><div className='modal-title'>Add provider key</div><div className='form-row single'><div className='field'><label>Name for master key</label><input value={keyName} onChange={(e) => setKeyName(e.target.value)} placeholder='e.g. Production OpenAI Key' /></div></div><div className='form-row single'><div className='field'><label>Provider</label><select value={provider} onChange={(e) => onProviderChange(e.target.value)}>{providerOptions.map((p)=><option key={p.id} value={p.id}>{p.label}</option>)}</select></div></div><div className='form-row single'><div className='field'><label>API key</label><input type='password' value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder={providerPlaceholder(providerOptions, provider)} autoComplete='off' /></div></div><div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '8px' }}>This key will be encrypted immediately. You won't be able to retrieve it — only replace it.</div><div className='modal-footer'><button className='btn btn-ghost' onClick={() => setModal('')}>Cancel</button><button className='btn btn-primary' onClick={saveMasterKey}>Save encrypted key</button></div></div></div>
-  </div></div>;
+      <div className="mb-4 flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success"><Lock size={16} /></div>
+        <div className="text-xs leading-relaxed text-muted-foreground">
+          <span className="font-semibold text-foreground">{masterKeys.length}{masterKeyLimit != null ? ` / ${masterKeyLimit}` : ''} master keys used.</span>{' '}
+          {atLimit ? 'You reached your plan limit. Upgrade billing to store more provider keys.' : 'Store provider keys for OpenAI, Google, Anthropic, and more.'}{' '}
+          Keys are encrypted at rest — never returned in any API response, never logged, only injected server-side at request time.
+        </div>
+      </div>
+
+      <Card>
+        {isLoading ? (
+          <div className="p-5 space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
+        ) : !masterKeys.length ? (
+          <div className="p-5"><EmptyState icon={KeyRound} title="No master keys configured" description="Add your first provider API key to start issuing subkeys." action={<Button size="sm" onClick={() => setModal('addkey')}>Add your first key</Button>} /></div>
+        ) : (
+          <div className="divide-y divide-border">
+            {masterKeys.map((mk) => (
+              <div key={mk.id} className="flex items-center gap-4 p-4 transition-colors hover:bg-secondary/30">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary text-lg">{PROVIDER_ICON[mk.provider] || '🔐'}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-semibold">{mk.name || providerLabel(providerOptions, mk.provider)}</span>
+                    <Badge tone="primary">{providerLabel(providerOptions, mk.provider)}</Badge>
+                  </div>
+                  <div className="mt-0.5 flex items-center gap-2">
+                    <code className="font-mono text-xs text-muted-foreground">{mk.key_masked}</code>
+                    <span className="text-xs text-muted-foreground">· Added {fmtDate(mk.created_at)}</span>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => deleteMasterKey(mk)} disabled={deletingId === mk.id} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                  <Trash2 size={14} /> {deletingId === mk.id ? 'Deleting…' : 'Delete'}
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      <Modal open={modal === 'addkey'} onClose={() => setModal('')} title="Add provider key" sub="This key will be encrypted immediately. You won't be able to retrieve it — only replace it."
+        footer={<><Button variant="ghost" onClick={() => setModal('')}>Cancel</Button><Button onClick={saveMasterKey}><ShieldCheck size={15} /> Save encrypted key</Button></>}>
+        <div className="space-y-4">
+          <div><Label>Name for master key</Label><Input value={keyName} onChange={(e) => setKeyName(e.target.value)} placeholder="e.g. Production OpenAI Key" /></div>
+          <div><Label>Provider</Label><Select value={provider} onChange={(e) => onProviderChange(e.target.value)}>{providerOptions.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}</Select></div>
+          <div><Label>API key</Label><Input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder={providerPlaceholder(providerOptions, provider)} autoComplete="off" /></div>
+        </div>
+      </Modal>
+    </div>
+  );
 }

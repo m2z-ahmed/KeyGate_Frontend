@@ -1,18 +1,14 @@
-import '../styles/OverviewPage.css';
+import { Card, CardHeader, StatCard, QuotaBar, Badge, Button, Skeleton, EmptyState } from '../kit';
+import { fmtNum, quotaColor, fmtTime } from '../../contexts/LethemContext';
+import { Activity, AlertTriangle, ArrowRight, TrendingUp, TrendingDown, Zap, DollarSign, Clock, ShieldCheck, BarChart3 } from 'lucide-react';
 
-function SkelStat() { return <div className='stat'><div className='skel skel-inline skel-h3 skel-w50' style={{marginBottom:8}} /><div className='skel skel-inline skel-h skel-w25' style={{marginBottom:4}} /><div className='skel skel-inline skel-h skel-w40' style={{marginTop:4}} /></div>; }
-function SkelMiniCard() { return <div className='card' style={{ margin: 0, padding: '14px' }}><div className='skel skel-block skel-h skel-w40' /><div className='skel skel-block skel-h skel-w60' style={{marginTop:6}} /></div>; }
-function SkelGraph() { return <div style={{ display: 'flex', alignItems: 'end', gap: '4px', height: '70px' }}>{Array.from({length:20}).map((_,i) => <div key={i} className='skel' style={{width:'8px', height:`${Math.max(8, 64, Math.random()*50+10)}px`, borderRadius:'2px'}} />)}</div>; }
-function SkelRow() { return <div style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid var(--border)' }}><span className='skel skel-inline skel-h skel-w50' /><span className='skel skel-inline skel-h skel-w20' /></div>; }
+function SkelStat() { return <div className="rounded-xl border border-border bg-card/60 p-5"><Skeleton className="h-3 w-20" /><Skeleton className="mt-3 h-7 w-28" /></div>; }
 
 export default function OverviewPage({ ctx, navigate }) {
   const { subkeys, logs, analytics, fmtNum, quotaColor, fmtTime, loading } = ctx;
   const failed = logs.filter((l) => l.status !== 'success').length;
   const costUsed = analytics.costAttribution?.reduce((s, r) => s + (r.est_cost_usd || 0), 0) || 0;
-  const todayBySubkey = logs.reduce((acc, l) => {
-    acc[l.subkey_name || '—'] = (acc[l.subkey_name || '—'] || 0) + (l.tokens_used || 0);
-    return acc;
-  }, {});
+  const todayBySubkey = logs.reduce((acc, l) => { acc[l.subkey_name || '—'] = (acc[l.subkey_name || '—'] || 0) + (l.tokens_used || 0); return acc; }, {});
   const topUser = Object.entries(todayBySubkey).sort((a, b) => b[1] - a[1])[0];
   const recentActivity = logs.slice(0, 4);
   const prevReq = logs.slice(15, 30).length || 1;
@@ -21,49 +17,99 @@ export default function OverviewPage({ ctx, navigate }) {
   const failTrend = Math.round(((logs.slice(0, 15).filter((l) => l.status !== 'success').length - prevFail) / prevFail) * 100);
   const isLoading = loading?.overview;
 
-  return <div className='page active'><div style={{ padding: '32px 36px' }}>
-    <div className='page-header'><div className='page-title'>Overview</div><div className='page-sub'>Observability dashboard for proxy usage</div></div>
+  const maxBar = Math.max(1, ...logs.slice(0, 30).map((l) => l.tokens_used || 0));
 
-    <div className='stats mobile-quick-stats'>
-      {isLoading ? <>
-        <SkelStat /><SkelStat /><SkelStat /><SkelStat />
-      </> : <>
-        <div className='stat'><div className='stat-val'>{fmtNum(analytics.totalRequests)}</div><div className='stat-label'>Requests</div><div className='stat-trend'>{reqTrend >= 0 ? `↑${Math.abs(reqTrend)}%` : `↓${Math.abs(reqTrend)}%`}</div></div>
-        <div className='stat'><div className='stat-val'>{fmtNum(failed)}</div><div className='stat-label'>Failed</div><div className='stat-trend'>{failTrend >= 0 ? `↑${Math.abs(failTrend)}%` : `↓${Math.abs(failTrend)}%`}</div></div>
-        <div className='stat'><div className='stat-val'>${costUsed.toFixed(2)}</div><div className='stat-label'>Cost</div></div>
-        <div className='stat'><div className='stat-val'>{analytics.avgLatency || '—'}</div><div className='stat-label'>Latency</div></div>
-      </>}
-    </div>
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-gradient">Overview</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Observability dashboard for proxy usage</p>
+      </div>
 
-    <div className='card health-card'><div className='card-header'><div><div className='card-title'>Health & abuse detection</div><div className='card-sub'>Fast signal check before deep analytics</div></div><button className='btn btn-ghost btn-sm' onClick={() => navigate('logs')}>Inspect logs →</button></div>
-      {isLoading ? <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}><SkelMiniCard /><SkelMiniCard /></div>
-        : <div className='mobile-stack-grid' style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <div className='card' style={{ margin: 0, padding: '14px' }}><div className='card-sub'>Top user</div><div className='mono' style={{ fontSize: '13px', marginTop: '4px' }}>{topUser ? `${topUser[0]} — ${fmtNum(topUser[1])} tokens` : '—'}</div></div>
-          <div className='card' style={{ margin: 0, padding: '14px' }}><div className='card-sub'>Abuse detection</div><div style={{ marginTop: '4px', fontSize: '12px' }}>{failed > analytics.totalRequests * 0.35 ? '⚠ High error ratio detected' : '✅ No suspicious activity'}</div></div>
-        </div>}
-    </div>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        {isLoading ? Array.from({ length: 4 }).map((_, i) => <SkelStat key={i} />) : (
+          <>
+            <StatCard label="Requests" value={fmtNum(analytics.totalRequests)} delta={`${reqTrend >= 0 ? '↑' : '↓'}${Math.abs(reqTrend)}%`} icon={Activity} />
+            <StatCard label="Failed" value={fmtNum(failed)} delta={`${failTrend >= 0 ? '↑' : '↓'}${Math.abs(failTrend)}%`} icon={AlertTriangle} />
+            <StatCard label="Cost" value={`$${costUsed.toFixed(2)}`} icon={DollarSign} />
+            <StatCard label="Latency" value={analytics.avgLatency || '—'} icon={Clock} />
+          </>
+        )}
+      </div>
 
-    <div className='card graph-card'><div className='card-header'><div><div className='card-title'>Usage graph</div><div className='card-sub'>Proxy requests trend</div></div></div>
-      {isLoading ? <SkelGraph /> : <div className='graph-frame' style={{ display: 'flex', alignItems: 'end', gap: '4px', height: '70px' }}>{logs.slice(0, 30).reverse().map((l, i) => <div key={i} title={`${l.subkey_name || '—'} | ${l.model || '—'} | ${fmtNum(l.tokens_used)} tokens | ${l.status}`} style={{ width: '8px', height: `${Math.max(8, Math.min(64, (l.tokens_used || 1) / 20))}px`, background: 'var(--accent)', opacity: .8, borderRadius: '2px' }} />)}</div>}
-    </div>
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader title="Health & abuse detection" sub="Fast signal check before deep analytics" actions={<Button variant="ghost" size="sm" onClick={() => navigate('logs')}>Inspect <ArrowRight size={14} /></Button>} />
+          <div className="p-5 space-y-4">
+            {isLoading ? <Skeleton className="h-16 w-full" /> : (
+              <>
+                <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/30 p-3">
+                  <span className="text-xs text-muted-foreground">Top user</span>
+                  <span className="text-xs font-medium">{topUser ? `${topUser[0]} — ${fmtNum(topUser[1])} tokens` : '—'}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/30 p-3">
+                  <span className="text-xs text-muted-foreground">Abuse detection</span>
+                  {failed > analytics.totalRequests * 0.35
+                    ? <Badge tone="warning"><AlertTriangle size={11} /> High error ratio</Badge>
+                    : <Badge tone="success"><ShieldCheck size={11} /> No suspicious activity</Badge>}
+                </div>
+              </>
+            )}
+          </div>
+        </Card>
 
-    <div className='card'><div className='card-header'><div><div className='card-title'>Recent activity</div><div className='card-sub'>Latest proxy events</div></div><button className='btn btn-ghost btn-sm' onClick={() => navigate('logs')}>Open logs →</button></div>
-      {isLoading ? Array.from({length:4}).map((_,i) => <SkelRow key={i} />)
-        : !recentActivity.length ? <div className='empty'><div className='empty-text'>No activity yet</div></div> : recentActivity.map((l, i) => <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '9px 0', borderBottom: '1px solid var(--border)' }}><span>{l.subkey_name || 'Unknown subkey'} — {l.status}</span><span className='mono'>{fmtTime(l.created_at)}</span></div>)}
-    </div>
+        <Card className="lg:col-span-2">
+          <CardHeader title="Usage graph" sub="Proxy requests trend" />
+          <div className="p-5">
+            {isLoading ? <Skeleton className="h-28 w-full" /> : (
+              <div className="flex h-28 items-end gap-1">
+                {logs.slice(0, 30).reverse().map((l, i) => (
+                  <div key={i} className="flex-1 min-w-[3px] rounded-t bg-gradient-to-t from-primary/40 to-primary transition-all hover:from-primary hover:to-primary/80" style={{ height: `${Math.max(4, ((l.tokens_used || 0) / maxBar) * 100)}%` }} title={`${fmtNum(l.tokens_used || 0)} tokens`} />
+                ))}
+              </div>
+            )}
+          </div>
+        </Card>
+      </div>
 
-    <div className='card'><div className='card-header'><div><div className='card-title'>Subkey analytics</div></div><button className='btn btn-ghost btn-sm' onClick={() => navigate('subkeys')}>Manage keys →</button></div>
-      {isLoading ? Array.from({length:5}).map((_,i) => <SkelRow key={i} />)
-        : Object.entries(todayBySubkey).length ? Object.entries(todayBySubkey).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([name, tokens]) => <div key={name} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border)' }}><span>{name}</span><span className='mono'>{fmtNum(tokens)} tokens today</span></div>) : <div className='empty'><div className='empty-text'>No subkey usage yet</div></div>}
-    </div>
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader title="Recent activity" sub="Latest proxy events" actions={<Button variant="ghost" size="sm" onClick={() => navigate('logs')}>Open logs <ArrowRight size={14} /></Button>} />
+          <div className="p-3">
+            {isLoading ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="mb-2 h-12 w-full" />) : !recentActivity.length ? (
+              <EmptyState icon={Activity} title="No activity yet" />
+            ) : recentActivity.map((l, i) => (
+              <div key={i} className="flex items-center justify-between rounded-lg px-3 py-2.5 hover:bg-secondary/40 transition-colors">
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium">{l.subkey_name || 'Unknown subkey'}</div>
+                  <div className="text-xs text-muted-foreground">{fmtTime(l.created_at)}</div>
+                </div>
+                <Badge tone={l.status === 'success' ? 'success' : 'danger'}>{l.status}</Badge>
+              </div>
+            ))}
+          </div>
+        </Card>
 
-    <div className='card'><div className='card-header'><div><div className='card-title'>Subkey usage snapshot</div><div className='card-sub'>Quota consumption across all active keys</div></div><button className='btn btn-ghost btn-sm' onClick={() => navigate('subkeys')}>Manage →</button></div>
-      {isLoading ? Array.from({length:3}).map((_,i) => <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><div style={{flex:1}}><div className='skel skel-block skel-h skel-w40' style={{marginBottom:6}} /><div className='skel skel-block skel-bar' /><div className='skel skel-block skel-h skel-w60' style={{marginTop:6}} /></div></div>)
-        : !subkeys.length ? <div className='empty'><div className='empty-text'>No subkeys yet — <button className='btn btn-ghost btn-sm' onClick={() => navigate('subkeys')}>create one</button></div></div> : subkeys.slice(0, 5).map((sk) => {
-          const pct = Math.min(100, Math.round((sk.tokens_used / sk.monthly_token_limit) * 100));
-          const col = quotaColor(sk.tokens_used, sk.monthly_token_limit);
-          return <div key={sk.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 0', borderBottom: '1px solid var(--border)' }}><div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '2px' }}>{sk.name}</div><div className='quota-bar'><div className={`quota-fill ${col}`} style={{ width: `${pct}%` }} /></div><div className='quota-text'>{fmtNum(sk.tokens_used)} / {fmtNum(sk.monthly_token_limit)} tokens — {pct}%</div></div><span className={`badge ${sk.status}`}>{sk.status}</span></div>;
-        })}
+        <Card>
+          <CardHeader title="Subkey usage snapshot" sub="Quota consumption across active keys" actions={<Button variant="ghost" size="sm" onClick={() => navigate('subkeys')}>Manage <ArrowRight size={14} /></Button>} />
+          <div className="p-5 space-y-3">
+            {isLoading ? Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />) : !subkeys.length ? (
+              <EmptyState icon={BarChart3} title="No subkeys yet" description="Create a subkey to start tracking usage." action={<Button size="sm" onClick={() => navigate('subkeys')}>Create one</Button>} />
+            ) : subkeys.slice(0, 5).map((sk) => {
+              const pct = Math.min(100, Math.round((sk.tokens_used / sk.monthly_token_limit) * 100));
+              return (
+                <div key={sk.id}>
+                  <div className="mb-1.5 flex items-center justify-between text-xs">
+                    <span className="font-medium">{sk.name}</span>
+                    <span className="font-mono text-muted-foreground">{fmtNum(sk.tokens_used)} / {fmtNum(sk.monthly_token_limit)}</span>
+                  </div>
+                  <QuotaBar used={sk.tokens_used} limit={sk.monthly_token_limit} tone={quotaColor(sk.tokens_used, sk.monthly_token_limit) === 'over' ? 'bg-destructive' : quotaColor(sk.tokens_used, sk.monthly_token_limit) === 'warn' ? 'bg-warning' : 'bg-success'} />
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      </div>
     </div>
-  </div></div>;
+  );
 }

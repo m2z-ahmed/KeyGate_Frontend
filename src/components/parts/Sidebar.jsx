@@ -1,87 +1,97 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLethem } from '../../contexts/LethemContext';
-import { IconOverview, IconMasterKey, IconSubkey, IconLogs, IconDemo, IconHealth, IconNotifications, IconArrowLeft, IconAnalytics, IconTeam, IconBilling, IconSettings, IconUser } from './Icons';
+import { useAuth } from '../../contexts/AuthContext';
+import { LogoFull } from './Logo';
+import { cn } from '../kit';
+import { proxyEndpoint as api } from '../../lib/config';
+import {
+  LayoutDashboard, KeyRound, KeySquare, Play, BarChart3, Gauge,
+  ScrollText, Bell, HeartPulse, Users, ShieldCheck, UserPlus,
+  Settings, Webhook, Lock, History, ArrowLeft, Copy, Check, X,
+} from 'lucide-react';
 
 const sections = [
-  { label: 'Overview', items: [['overview', 'Overview', IconOverview]] },
-  { label: 'Access', items: [['masterkeys', 'Master keys', IconMasterKey], ['subkeys', 'Subkeys', IconSubkey], ['demo', 'Live demo', IconDemo]] },
-  { label: 'Monitoring', items: [['analytics', 'Analytics', IconAnalytics], ['usage', 'Usage', IconBilling], ['logs', 'Request logs', IconLogs], ['notifications', 'Notifications', IconNotifications], ['health', 'Health', IconHealth]] },
-  { label: 'Team', items: [['members', 'Members', IconTeam], ['roles', 'Roles', IconUser], ['invites', 'Invites', IconNotifications]] },
-  { label: 'Settings', items: [['general', 'General', IconSettings], ['endpoint', 'API Endpoint', IconDemo], ['security', 'Security', IconMasterKey], ['audit', 'Audit Logs', IconLogs]] },
+  { label: 'Overview', items: [['overview', 'Overview', LayoutDashboard]] },
+  { label: 'Access', items: [['masterkeys', 'Master keys', KeyRound], ['subkeys', 'Subkeys', KeySquare], ['demo', 'Live demo', Play]] },
+  { label: 'Monitoring', items: [['analytics', 'Analytics', BarChart3], ['usage', 'Usage', Gauge], ['logs', 'Request logs', ScrollText], ['notifications', 'Notifications', Bell], ['health', 'Health', HeartPulse]] },
+  { label: 'Team', items: [['members', 'Members', Users], ['roles', 'Roles', ShieldCheck], ['invites', 'Invites', UserPlus]] },
+  { label: 'Settings', items: [['general', 'General', Settings], ['endpoint', 'API Endpoint', Webhook], ['security', 'Security', Lock], ['audit', 'Audit Logs', History]] },
 ];
-
-const mobileItems = [
-  { key: 'overview', label: 'Overview', Icon: IconOverview, items: [['overview', 'Overview', IconOverview]] },
-  { key: 'access', label: 'Access', Icon: IconMasterKey, items: sections[1].items },
-  { key: 'monitor', label: 'Monitor', Icon: IconAnalytics, items: sections[2].items },
-  { key: 'team', label: 'Team', Icon: IconTeam, items: sections[3].items },
-  { key: 'settings', label: 'Settings', Icon: IconSettings, items: sections[4].items },
-];
-
-function MobileNavPopover({ item, anchorRef, onNavigate, onClose }) {
-  const panelRef = useRef(null);
-  const [style, setStyle] = useState({ left: 12, bottom: 86, width: 220 });
-
-  useEffect(() => {
-    const update = () => {
-      const anchor = anchorRef.current?.getBoundingClientRect();
-      if (!anchor) return;
-      const width = Math.min(240, window.innerWidth - 24);
-      const left = Math.max(12, Math.min(window.innerWidth - width - 12, anchor.left + (anchor.width / 2) - (width / 2)));
-      const bottom = Math.max(84, window.innerHeight - anchor.top + 10);
-      setStyle({ left, bottom, width });
-    };
-    update();
-    window.addEventListener('resize', update);
-    window.addEventListener('orientationchange', update);
-    return () => { window.removeEventListener('resize', update); window.removeEventListener('orientationchange', update); };
-  }, [anchorRef, item]);
-
-  useEffect(() => {
-    const close = (event) => {
-      if (panelRef.current?.contains(event.target) || anchorRef.current?.contains(event.target)) return;
-      onClose();
-    };
-    const escape = (event) => { if (event.key === 'Escape') onClose(); };
-    document.addEventListener('pointerdown', close);
-    document.addEventListener('keydown', escape);
-    return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', escape); };
-  }, [anchorRef, onClose]);
-
-  return <div ref={panelRef} className='mobile-nav-popover' style={style} role='menu' aria-label={`${item.label} pages`}>
-    <span className='mobile-nav-popover-caret' />
-    {item.items.map(([key, label, Icon]) => <button key={key} type='button' role='menuitem' onClick={() => onNavigate(key)}><Icon width={17} height={17} /><span>{label}</span></button>)}
-  </div>;
-}
 
 export default function Sidebar({ page, navigate, onBackToConsole, drawerOpen, setDrawerOpen }) {
-  const [collapsed, setCollapsed] = useState(() => ({}));
-  const [openMobileKey, setOpenMobileKey] = useState('');
-  const tabRefs = useRef({});
   const { ctx } = useLethem();
+  const [copied, setCopied] = useState(false);
   const endpoint = `${ctx.API}/`;
-  const copyEndpoint = () => ctx.copyText(endpoint, 'proxy-endpoint');
-  const toggleSection = (label) => setCollapsed((v) => ({ ...v, [label]: !v[label] }));
-  const go = (next) => { navigate(next); setDrawerOpen(false); setOpenMobileKey(''); };
-  const activeMobileKey = useMemo(() => mobileItems.find((item) => item.items.some(([key]) => key === page))?.key || 'overview', [page]);
 
-  const renderItem = ([key, label, Icon], mobile = false) => (
-    <button key={key} className={`${mobile ? 'mobile-drawer-item' : 'nav-item'} ${page === key ? 'active' : ''}`} onClick={() => (mobile ? go(key) : navigate(key))}>
-      <Icon /> {label}{key === 'demo' && <span className='nav-dot' />}
-    </button>
+  const copyEndpoint = () => {
+    ctx.copyText(endpoint, 'proxy-endpoint');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1600);
+  };
+
+  const go = (next) => { navigate(next); setDrawerOpen(false); };
+
+  const renderItem = ([key, label, Icon]) => {
+    const active = page === key;
+    return (
+      <button
+        key={key}
+        onClick={() => go(key)}
+        className={cn(
+          'group relative flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all',
+          active ? 'bg-primary/10 text-foreground' : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+        )}
+      >
+        {active && <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-primary" />}
+        <Icon size={16} className={cn('shrink-0 transition-colors', active ? 'text-primary' : 'opacity-70 group-hover:opacity-100')} />
+        <span className="truncate">{label}</span>
+        {key === 'demo' && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />}
+      </button>
+    );
+  };
+
+  const content = (
+    <div className="flex h-full flex-col">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-5">
+        <button onClick={onBackToConsole} className="transition-opacity hover:opacity-80"><LogoFull size={26} /></button>
+        <button onClick={() => setDrawerOpen(false)} className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground lg:hidden">
+          <X size={18} />
+        </button>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        {sections.map((section) => (
+          <div key={section.label} className="mb-4">
+            <div className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground/60">{section.label}</div>
+            <div className="space-y-0.5">{section.items.map(renderItem)}</div>
+          </div>
+        ))}
+      </nav>
+
+      <div className="border-t border-border p-3">
+        <div className="rounded-lg border border-border bg-secondary/30 p-3">
+          <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60">Proxy endpoint</div>
+          <div className="flex items-start gap-2">
+            <code className="flex-1 break-all font-mono text-[11px] text-primary/90">{endpoint}</code>
+            <button onClick={copyEndpoint} className="shrink-0 rounded p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+              {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
-  return <>
-    <aside className='sidebar'><nav className='nav'>
-      {onBackToConsole && <button className='nav-item' onClick={onBackToConsole}><IconArrowLeft /> Back to console</button>}
-      {sections.map((section) => <div className='nav-section' key={section.label}><button className='nav-label nav-label-button' onClick={() => toggleSection(section.label)} aria-expanded={!collapsed[section.label]}>{section.label}<span>{collapsed[section.label] ? '+' : '−'}</span></button>{!collapsed[section.label] && section.items.map((item) => renderItem(item))}</div>)}
-    </nav><div className='sidebar-footer'><button type='button' className='api-url-box api-url-button' onClick={copyEndpoint} title='Copy proxy endpoint'><div className='api-url-label'>Proxy endpoint</div><div className='api-url'>{ctx.copiedItem === 'proxy-endpoint' ? 'Copied!' : endpoint}</div></button></div></aside>
+  return (
+    <>
+      <aside className="hidden w-60 shrink-0 border-r border-border bg-card/40 lg:block">{content}</aside>
 
-    <div className={`mobile-drawer-backdrop ${drawerOpen ? 'open' : ''}`} onClick={(e) => e.target === e.currentTarget && setDrawerOpen(false)}><aside className='mobile-drawer'><div className='mobile-drawer-title'>Lethem</div>{onBackToConsole && <button className='mobile-drawer-item mobile-drawer-back' onClick={() => { onBackToConsole(); setDrawerOpen(false); }}><IconArrowLeft /> Back to console</button>}<div className='mobile-drawer-list'>{sections.map((section) => <div className='mobile-drawer-section' key={section.label}><button className='nav-label nav-label-button' onClick={() => toggleSection(section.label)} aria-expanded={!collapsed[section.label]}>{section.label}<span>{collapsed[section.label] ? '+' : '−'}</span></button>{!collapsed[section.label] && section.items.map((item) => renderItem(item, true))}</div>)}</div><button type='button' className='mobile-drawer-footer api-url-button' onClick={copyEndpoint}>{ctx.copiedItem === 'proxy-endpoint' ? 'Copied!' : endpoint}</button></aside></div>
-
-    <nav className='mobile-tabbar' aria-label='Mobile navigation'>
-      {mobileItems.map((item) => { const Icon = item.Icon; return <button key={item.key} ref={(node) => { tabRefs.current[item.key] = node; }} className={`mobile-tab ${activeMobileKey === item.key ? 'active' : ''} ${openMobileKey === item.key ? 'popover-open' : ''}`} onClick={() => item.items.length === 1 ? go(item.items[0][0]) : setOpenMobileKey((key) => key === item.key ? '' : item.key)} aria-haspopup={item.items.length > 1 ? 'menu' : undefined} aria-expanded={openMobileKey === item.key}><Icon width={18} height={18} /><span>{item.label}</span></button>; })}
-    </nav>
-    {openMobileKey && <MobileNavPopover item={mobileItems.find((item) => item.key === openMobileKey)} anchorRef={{ current: tabRefs.current[openMobileKey] }} onNavigate={go} onClose={() => setOpenMobileKey('')} />}
-  </>;
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={(e) => { if (e.target === e.currentTarget) setDrawerOpen(false); }} />
+          <div className="absolute left-0 top-0 h-full w-72 border-r border-border bg-card shadow-2xl animate-fade-in">{content}</div>
+        </div>
+      )}
+    </>
+  );
 }
