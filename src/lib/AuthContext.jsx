@@ -1,8 +1,39 @@
-const db = globalThis.__B44_DB__ || { auth:{ isAuthenticated: async()=>false, me: async()=>null }, entities:new Proxy({}, { get:()=>({ filter:async()=>[], get:async()=>null, create:async()=>({}), update:async()=>({}), delete:async()=>({}) }) }), integrations:{ Core:{ UploadFile:async()=>({ file_url:'' }) } } };
-
+import db from '@/lib/authService';
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 import { appParams } from '@/lib/app-params';
+
+const createAxiosClient = ({ baseURL, headers = {}, token }) => {
+  const request = async (path, options = {}) => {
+    const url = `${baseURL}${path}`;
+    const init = {
+      method: options.method || 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    };
+
+    const response = await fetch(url, init);
+    const text = await response.text();
+    const data = text ? JSON.parse(text) : null;
+    if (!response.ok) {
+      const error = new Error(data?.message || response.statusText || 'Request failed');
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+    return data;
+  };
+
+  return {
+    get: async (path) => request(path),
+    post: async (path, body) => request(path, { method: 'POST', body }),
+  };
+};
 
 const AuthContext = createContext();
 
