@@ -124,7 +124,8 @@ function AppRouter({ routeState }) {
 function AuthenticatedApp() {
   const routeState = useConsoleRouteState();
   const { projectSlug, page, isPublicHealth, publicPage, view, go } = routeState;
-  const { isAuthenticated, isLoading: authLoading, authError } = useAuth();
+  const { isAuthenticated, isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
+  const authLoading = isLoadingAuth || isLoadingPublicSettings;
   const [booted, setBooted] = useState(false);
 
   useEffect(() => { setBooted(false); }, [isAuthenticated]);

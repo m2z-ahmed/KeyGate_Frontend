@@ -24,3 +24,10 @@ export default function ScrollToTop() {
         document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
       }, 50);
       return () => window.clearTimeout(timer);
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname, hash, navigationType]);
+
+  return null;
+}
