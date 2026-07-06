@@ -1,0 +1,16 @@
+{
+  "name": "Lethem",
+  "short_name": "Lethem",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "description": "Secure API access management console.",
+  "icons": [
+    {
+      "src": "https://db.com/logo_v2.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
