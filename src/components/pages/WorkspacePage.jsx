@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Card, CardHeader, Button, Input, Label, Badge } from '../kit';
-import { Save, RotateCcw } from 'lucide-react';
 
 const clean = (value) => String(value || '').trim();
 
@@ -11,9 +9,17 @@ export default function WorkspacePage({ ctx }) {
   const [originalName, setOriginalName] = useState('');
 
   useEffect(() => {
-    let cancelled = false; setLoading(true);
-    ctx.api('/api/me').then((data) => { if (cancelled) return; const org = data?.organization || {}; setWorkspace({ name: org.name || '', slug: org.slug || '', role: org.role || '', plan: org.plan || 'free' }); setOriginalName(org.name || ''); })
-      .catch((err) => ctx.notify(err.message || 'Unable to load workspace', 'error')).finally(() => { if (!cancelled) setLoading(false); });
+    let cancelled = false;
+    setLoading(true);
+    ctx.api('/api/me')
+      .then((data) => {
+        if (cancelled) return;
+        const org = data?.organization || {};
+        setWorkspace({ name: org.name || '', slug: org.slug || '', role: org.role || '', plan: org.plan || 'free' });
+        setOriginalName(org.name || '');
+      })
+      .catch((err) => ctx.notify(err.message || 'Unable to load workspace', 'error'))
+      .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
 
@@ -26,28 +32,55 @@ export default function WorkspacePage({ ctx }) {
     try {
       const data = await ctx.api('/api/me', { method: 'PATCH', body: { workspaceName: clean(workspace.name) } });
       const org = data?.organization || {};
-      setWorkspace((c) => ({ ...c, name: org.name || clean(workspace.name), slug: org.slug || c.slug, plan: org.plan || c.plan, role: org.role || c.role }));
+      setWorkspace((current) => ({ ...current, name: org.name || clean(workspace.name), slug: org.slug || current.slug, plan: org.plan || current.plan, role: org.role || current.role }));
       setOriginalName(org.name || clean(workspace.name));
       ctx.notify('Workspace updated');
-    } catch (err) { ctx.notify(err.message || 'Unable to update workspace', 'error'); }
-    finally { setSaving(false); }
+    } catch (err) {
+      ctx.notify(err.message || 'Unable to update workspace', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div>
-      <div className="mb-6"><h1 className="font-heading text-2xl font-bold tracking-tight text-gradient">Workspace Settings</h1><p className="mt-1 text-sm text-muted-foreground">Manage the organization identity shared across projects, billing, and teammates.</p></div>
+    <section className='page active workspace-page'>
+      <div className='page-header'>
+        <h1 className='page-title'>Workspace Settings</h1>
+        <p className='page-sub'>Manage the organization identity shared across projects, billing, and teammates.</p>
+      </div>
 
-      <Card>
-        <CardHeader title="Workspace identity" sub="Rename the workspace your account owns or administers." actions={<Badge tone={loading ? 'warning' : 'success'}>{loading ? 'Loading' : 'Editable'}</Badge>} />
-        <form onSubmit={saveWorkspace} className="space-y-4 p-5">
-          <div><Label>Workspace name</Label><Input value={workspace.name} onChange={(e) => setWorkspace((v) => ({ ...v, name: e.target.value }))} placeholder="Acme Workspace" disabled={loading || saving} /></div>
-          {workspace.slug && <div><Label>Workspace slug</Label><Input value={workspace.slug} disabled /><p className="mt-1.5 text-xs text-muted-foreground">The slug is auto-generated and cannot be changed.</p></div>}
-          <div className="flex justify-end gap-2 pt-2">
-            {changed && <Button type="button" variant="ghost" onClick={() => setWorkspace((v) => ({ ...v, name: originalName }))}><RotateCcw size={15} /> Reset</Button>}
-            <Button type="submit" disabled={saving || !changed}><Save size={15} /> {saving ? 'Saving…' : 'Save workspace'}</Button>
+      <div className='profile-grid'>
+        <form className='card profile-editor-card' onSubmit={saveWorkspace}>
+          <div className='card-header'>
+            <div>
+              <div className='card-title'>Workspace identity</div>
+              <div className='card-sub'>Rename the workspace your account owns or administers.</div>
+            </div>
+            <span className='badge active'>{loading ? 'Loading' : 'Editable'}</span>
+          </div>
+          <div className='form-row single'>
+            <div className='field'>
+              <label>Workspace name</label>
+              <input value={workspace.name} onChange={(e) => setWorkspace((v) => ({ ...v, name: e.target.value }))} placeholder='Acme Workspace' disabled={loading || saving} />
+            </div>
+          </div>
+          <div className='modal-footer'>
+            <button type='button' className='btn btn-ghost' disabled={!changed || saving || loading} onClick={() => setWorkspace((v) => ({ ...v, name: originalName }))}>Reset</button>
+            <button type='submit' className='btn btn-primary' disabled={!changed || saving || loading}>{saving ? 'Saving…' : 'Save workspace'}</button>
           </div>
         </form>
-      </Card>
-    </div>
+
+        <aside className='card profile-summary-card'>
+          <div className='profile-avatar'>{clean(workspace.name || 'W').charAt(0).toUpperCase()}</div>
+          <h2>{workspace.name || 'Workspace'}</h2>
+          <p>{workspace.slug || 'Workspace slug'}</p>
+          <div className='profile-summary-list'>
+            <span><b>Your role</b>{workspace.role || '—'}</span>
+            <span><b>Plan</b>{workspace.plan || 'free'}</span>
+            <span><b>Scope</b>Account-level settings</span>
+          </div>
+        </aside>
+      </div>
+    </section>
   );
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { cacheGet, cacheSet, cacheBust, cacheBustAfterMutation, cachePruneExpired, setCacheScope } from '../lib/cache';
 import { useAuth } from './AuthContext';
 import { API_BASE_URL } from '../lib/config';
@@ -49,7 +49,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
   const copyText = async (text, id = '') => {
     try {
       await navigator.clipboard.writeText(text);
-      if (id) { setCopiedItem(id); setTimeout(() => setCopiedItem((v) => (v === id ? '' : v)), 1600); }
+      if (id) { setCopiedItem(id); setTimeout(() => setCopiedItem((v) => v === id ? '' : v), 1600); }
       else notify('Copied to clipboard');
     } catch { notify('Failed to copy', 'error'); }
   };
@@ -62,7 +62,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
     const headers = {
       ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
       ...(projectSlug ? { 'x-project-id': projectSlug } : {}),
-      ...opts.headers,
+      ...opts.headers
     };
     const skipAuth = Boolean(opts.skipAuth || opts.headers?.Authorization);
     const cacheScope = skipAuth ? 'public' : (user?.sub || 'anonymous');
@@ -74,6 +74,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
     delete opts.skipAuth;
     delete opts.noCache;
 
+    // Return cached GET data if fresh
     if (isRead && !noCache) {
       const cached = cacheGet(path, cacheScope);
       if (cached !== null) return cached;
@@ -87,11 +88,13 @@ export default function LethemProvider({ children, projectSlug, page }) {
       throw err;
     }
 
+    // Cache successful reads; bust only real mutations. noCache GETs bypass storage without invalidating.
     if (isRead) {
       if (!noCache) cacheSet(path, data, cacheScope);
     } else {
       cacheBustAfterMutation(path, cacheScope);
     }
+
     return data;
   };
 
@@ -182,7 +185,9 @@ export default function LethemProvider({ children, projectSlug, page }) {
       const an = await api('/api/analytics');
       setLogs(an.logs || []);
       setAnalytics(an);
-    } finally { setLoading((v) => ({ ...v, logs: false })); }
+    } finally {
+      setLoading((v) => ({ ...v, logs: false }));
+    }
   };
 
   const loadMembers = async () => {
@@ -258,13 +263,12 @@ export default function LethemProvider({ children, projectSlug, page }) {
     return p;
   };
 
-  const deleteProject = async (project) => {
-    const target = project || projectToDelete;
-    if (!target) return null;
-    const ref = encodeURIComponent(target.slug || target.id);
+  const deleteProject = async (targetProject = projectToDelete) => {
+    if (!targetProject) return;
+    const ref = encodeURIComponent(targetProject.slug || targetProject.id);
     const attempts = [
       { path: `/api/projects/by-slug/${ref}`, method: 'DELETE' },
-      { path: `/api/projects/${encodeURIComponent(target.id)}`, method: 'DELETE' },
+      { path: `/api/projects/${encodeURIComponent(targetProject.id)}`, method: 'DELETE' },
     ];
     let deleted = false;
     for (const attempt of attempts) {
@@ -275,7 +279,6 @@ export default function LethemProvider({ children, projectSlug, page }) {
     }
     if (!deleted) throw new Error('Failed to delete project');
     cacheBust('/api/projects', user?.sub || 'anonymous');
-    cacheBust('/console-page', user?.sub || 'anonymous');
     setDeleteConfirm('');
     setProjectToDelete(null);
     notify('Project deleted');
@@ -290,18 +293,24 @@ export default function LethemProvider({ children, projectSlug, page }) {
     if (page === 'masterkeys') loadMasterKeys().catch((e) => notify(e.message, 'error'));
     if (page === 'subkeys') loadSubkeys().catch((e) => notify(e.message, 'error'));
     if (page === 'logs') loadLogs().catch((e) => notify(e.message, 'error'));
+    if (page === 'members') loadMembers().catch((e) => notify(e.message, 'error'));
+    if (page === 'invites') loadInvites().catch((e) => notify(e.message, 'error'));
     if (page === 'demo' || page === 'notifications') {
       loadSubkeys().catch((e) => notify(e.message, 'error'));
       setLoading((v) => ({ ...v, subkeys: true }));
     }
   }, [page, projectSlug]);
 
+  // Reset subkey loading when data arrives for demo/notifications
   useEffect(() => {
+    if (page === 'members') loadMembers().catch((e) => notify(e.message, 'error'));
+    if (page === 'invites') loadInvites().catch((e) => notify(e.message, 'error'));
     if (page === 'demo' || page === 'notifications') {
       if (subkeys.length > 0) setLoading((v) => ({ ...v, subkeys: false }));
     }
   }, [subkeys, page]);
 
+  // Auto-refresh on tab focus — catches external API requests
   useEffect(() => {
     const onVisible = () => {
       if (document.visibilityState !== 'visible') return;
@@ -316,35 +325,28 @@ export default function LethemProvider({ children, projectSlug, page }) {
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [page, projectSlug]);
 
-  const selectedProject = useMemo(() => projects.find((p) => p.slug === projectSlug || p.id === projectSlug) || null, [projects, projectSlug]);
-  const filteredProjects = useMemo(() => {
-    const q = projectSearch.trim().toLowerCase();
-    if (!q) return projects;
-    return projects.filter((p) => (p.name || p.slug || p.id || '').toLowerCase().includes(q));
-  }, [projects, projectSearch]);
-
   const ctx = useMemo(() => ({
     API, providers, loadProviders, fmtNum, fmtTime, fmtDate, quotaColor, sleep,
     api, notify, copyText, modal, setModal, revealedToken, setRevealedToken,
-    loadMasterKeys, loadSubkeys, loadLogs, loadOverview, loadBilling,
-    loadMembers, loadInvites, inviteMember, acceptInvite, checkInvitee,
-    updateMemberRole, removeMember, revokeInvite, deleteInvite,
-    subkeys, setSubkeys, masterKeys, logs, analytics, billing, setBilling, page, loading, copiedItem,
-    members, invites, teamLoading, account, loadAccount, updateAccount,
-  }), [modal, subkeys, masterKeys, logs, analytics, billing, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub, members, invites, teamLoading, account]);
+    loadMasterKeys, loadSubkeys, loadLogs, loadOverview, loadBilling, loadMembers, loadInvites, loadAccount, updateAccount,
+    checkInvitee, inviteMember, acceptInvite, updateMemberRole, removeMember, revokeInvite, deleteInvite,
+    subkeys, setSubkeys, masterKeys, logs, analytics, billing, setBilling, members, invites, teamLoading, account, setAccount, page, loading, copiedItem,
+    selectedProject: projects.find((p) => p.slug === projectSlug || p.id === projectSlug),
+  }), [modal, subkeys, masterKeys, logs, analytics, billing, members, invites, teamLoading, account, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub, projects]);
 
   const value = useMemo(() => ({
     ctx,
     projects, projectName, setProjectName,
-    projectSearch, setProjectSearch,
-    filteredProjects, selectedProject,
-    showPlanBanner, setShowPlanBanner,
-    projectToDelete, setProjectToDelete,
-    deleteConfirm, setDeleteConfirm,
-    deleteProject, createProject,
-    notif, notify,
+    projectSearch, setProjectSearch, projectToDelete, setProjectToDelete,
+    deleteConfirm, setDeleteConfirm, showPlanBanner, setShowPlanBanner,
     mobileMenuOpen, setMobileMenuOpen,
-  }), [ctx, projects, projectName, projectSearch, filteredProjects, selectedProject, showPlanBanner, projectToDelete, deleteConfirm, notif, mobileMenuOpen]);
+    notif,
+    createProject, deleteProject, loadProviders, loadProjects, loadBilling, loadAccount, updateAccount, account, notify, acceptPendingInviteToken,
+    filteredProjects: projects.filter((p) =>
+      `${p.name} ${p.slug} ${p.id}`.toLowerCase().includes(projectSearch.toLowerCase())
+    ),
+    selectedProject: projects.find((p) => p.slug === projectSlug || p.id === projectSlug),
+  }), [ctx, projects, projectName, projectSearch, projectToDelete, deleteConfirm, showPlanBanner, mobileMenuOpen, notif, projectSlug, account]);
 
   return <CTX.Provider value={value}>{children}</CTX.Provider>;
 }

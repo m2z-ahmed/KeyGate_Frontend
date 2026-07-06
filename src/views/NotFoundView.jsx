@@ -1,19 +1,25 @@
-import { Button } from '../components/kit';
-import { Compass, ArrowLeft, Home } from 'lucide-react';
-
 export default function NotFoundView({ go, page, navigate }) {
   return (
-    <div className="dark flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
-      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-muted-foreground">
-        <Compass size={26} />
-      </div>
-      <h1 className="font-heading text-3xl font-bold tracking-tight">404 — Page not found</h1>
-      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-        “{page}” doesn’t exist in this console.
-      </p>
-      <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-        {navigate && <Button variant="outline" onClick={() => navigate('overview')}><ArrowLeft size={15} /> Go to Overview</Button>}
-        <Button variant="ghost" onClick={() => go('/console')}><Home size={15} /> All projects</Button>
+    <div className='page active not-found-page'>
+      <div className='not-found-content'>
+        <div className='not-found-icon'>
+          <svg width="80" height="80" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2L4 6.5v6c0 6.5 4 12 10 13.5 6-1.5 10-7 10-13.5v-6L14 2Z" fill="url(#nf-grad)" opacity=".3" />
+            <path d="M14 2L4 6.5v6c0 6.5 4 12 10 13.5 6-1.5 10-7 10-13.5v-6L14 2Z" stroke="url(#nf-grad)" strokeWidth="1" strokeDasharray="3 3" opacity=".5" />
+            <defs>
+              <linearGradient id="nf-grad" x1="4" y1="2" x2="24" y2="28">
+                <stop stopColor="#7c6bff" />
+                <stop offset="1" stopColor="#a594ff" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h1 className='not-found-title'>404 — Page not found</h1>
+        <p className='not-found-sub'>"{page}" doesn't exist in this console.</p>
+        <div className='not-found-actions'>
+          <button className='btn btn-primary' onClick={() => navigate('overview')}>Go to Overview</button>
+          <button className='btn btn-ghost' onClick={() => go('/console')}>All projects</button>
+        </div>
       </div>
     </div>
   );
