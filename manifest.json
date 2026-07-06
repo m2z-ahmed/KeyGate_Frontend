@@ -8,7 +8,7 @@
   "description": "Secure API access management console.",
   "icons": [
     {
-      "src": "https://db.com/logo_v2.svg",
+      "src": "/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
