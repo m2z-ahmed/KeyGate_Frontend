@@ -60,7 +60,7 @@ export default function PublicLayout({ children, compact = false }) {
           <nav className="hidden items-center gap-1 md:flex">
             {NAV_LINKS.map((link) => (
               <button
-                key={link.href}
+                key={`nav-${link.label}`}
                 onClick={() => go(link.href)}
                 className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900"
               >
@@ -102,7 +102,7 @@ export default function PublicLayout({ children, compact = false }) {
           <div className="space-y-1 px-4 py-4">
             {NAV_LINKS.map((link) => (
               <button
-                key={link.href}
+                key={`mobile-nav-${link.label}`}
                 onClick={() => go(link.href)}
                 className="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-slate-700 hover:bg-slate-100"
               >
@@ -174,7 +174,7 @@ export default function PublicLayout({ children, compact = false }) {
               <h3 className="text-sm font-semibold text-white">Product</h3>
               <ul className="mt-4 space-y-3 text-sm">
                 {NAV_LINKS.map((link) => (
-                  <li key={link.href}>
+                  <li key={`footer-product-${link.label}`}>
                     <button
                       onClick={() => go(link.href)}
                       className="public-footer-link public-footer-link--product"

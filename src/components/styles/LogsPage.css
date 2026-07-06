@@ -1,1 +1,130 @@
-/* page-specific styles kept in global style parity */
+/* Logs Page Styles */
+
+.logs-page-filters{
+  display:flex;
+  gap:12px;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+}
+
+.logs-page-search{
+  flex:1;
+  min-width:200px;
+  background:rgba(0,0,0,0.3);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 16px;
+  color:var(--text);
+  font-size:13px;
+  outline:none;
+  transition:var(--transition);
+}
+
+.logs-page-search:focus{
+  border-color:var(--primary);
+  background:rgba(0,0,0,0.4);
+  box-shadow:0 0 0 3px rgba(14,165,233,0.12);
+}
+
+.logs-page-search::placeholder{
+  color:var(--dim);
+}
+
+/* Log status badges */
+.log-status-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 12px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:600;
+  text-transform:capitalize;
+}
+
+.log-status-badge.success{
+  background:rgba(16,184,130,0.12);
+  color:var(--green);
+  border:1px solid rgba(16,184,130,0.2);
+}
+
+.log-status-badge.error{
+  background:rgba(239,68,68,0.12);
+  color:var(--red);
+  border:1px solid rgba(239,68,68,0.2);
+}
+
+.log-status-badge.quota{
+  background:rgba(245,158,11,0.12);
+  color:var(--amber);
+  border:1px solid rgba(245,158,11,0.2);
+}
+
+/* Mobile log cards */
+@media (max-width:1024px){
+  .logs-table-wrap{
+    display:none;
+  }
+
+  .logs-mobile-cards{
+    display:grid;
+    gap:10px;
+  }
+
+  .log-mobile-card{
+    background:linear-gradient(165deg,rgba(15,23,42,0.6),rgba(6,10,18,0.7));
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+    transition:var(--transition);
+  }
+
+  .log-mobile-card:hover{
+    border-color:rgba(14,165,233,0.2);
+  }
+
+  .log-mobile-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+  }
+
+  .log-mobile-id{
+    font-family:'DM Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+  }
+
+  .log-mobile-body{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+    font-size:12px;
+  }
+
+  .log-mobile-body span{
+    color:var(--dim);
+  }
+
+  .log-mobile-body strong{
+    color:var(--text);
+  }
+}
+
+@media (min-width:1025px){
+  .logs-mobile-cards{
+    display:none;
+  }
+}
+
+/* Responsive table */
+@media (max-width:760px){
+  .logs-page-filters{
+    flex-direction:column;
+  }
+
+  .logs-page-search{
+    min-width:100%;
+  }
+}
