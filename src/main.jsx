@@ -4,7 +4,6 @@ import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
 import './lib/cache';        // boot cache layer + expose console helpers
 import './global/style.css';
-import './global/responsive-styles.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <AuthProvider>

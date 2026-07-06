@@ -29,7 +29,7 @@ export const NAV_LINKS = [
   { label: 'Features', href: '/#features' },
   { label: 'Pricing', href: '/#pricing' },
   { label: 'FAQ', href: '/#faq' },
-  { label: 'Contact', href: 'mailto:support@lethem.app' },
+  { label: 'Docs', href: '/#faq' },
 ];
 
 export const LEGAL_LINKS = [
