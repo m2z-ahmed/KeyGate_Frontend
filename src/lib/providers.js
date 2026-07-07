@@ -56,6 +56,28 @@ export const FALLBACK_PROVIDERS = [
     { id: 'sonar-reasoning', label: 'Sonar Reasoning' },
     { id: 'sonar-reasoning-pro', label: 'Sonar Reasoning Pro' },
   ] },
+  { id: 'cohere', label: 'Cohere', default_model: 'command-r-08-2024', key_placeholder: '...', models: [
+    { id: 'command-r7b-12-2024', label: 'Command R7B' },
+    { id: 'command-r-08-2024', label: 'Command R' },
+    { id: 'command-a-2025-03', label: 'Command A' },
+    { id: 'command-r-plus-08-2024', label: 'Command R+' },
+  ] },
+  { id: 'fireworks', label: 'Fireworks AI', default_model: 'accounts/fireworks/models/llama-v3p3-70b-instruct', key_placeholder: 'fw_...', models: [
+    { id: 'accounts/fireworks/models/deepseek-v4-flash', label: 'DeepSeek V4 Flash' },
+    { id: 'accounts/fireworks/models/llama-v3p3-70b-instruct', label: 'Llama 3.3 70B' },
+    { id: 'accounts/fireworks/models/llama-v3p1-8b-instruct', label: 'Llama 3.1 8B' },
+    { id: 'accounts/fireworks/models/deepseek-v4-pro', label: 'DeepSeek V4 Pro' },
+    { id: 'accounts/fireworks/models/qwen3-32b', label: 'Qwen3 32B' },
+    { id: 'accounts/fireworks/models/mixtral-8x22b-instruct', label: 'Mixtral 8x22B' },
+  ] },
+  { id: 'deepinfra', label: 'DeepInfra', default_model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', key_placeholder: 'api-key...', models: [
+    { id: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', label: 'Llama 3.3 70B Turbo' },
+    { id: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo', label: 'Llama 3.1 8B Turbo' },
+    { id: 'Qwen/Qwen3-32B', label: 'Qwen3 32B' },
+    { id: 'deepseek-ai/DeepSeek-V3', label: 'DeepSeek V3' },
+    { id: 'deepseek-ai/DeepSeek-R1', label: 'DeepSeek R1' },
+    { id: 'meta-llama/Llama-4-Scout-17B-16E-Instruct', label: 'Llama 4 Scout' },
+  ] },
 ];
 
 export const providerLabel = (providers, id) => (providers || FALLBACK_PROVIDERS).find((p) => p.id === id)?.label || id || 'Unknown';

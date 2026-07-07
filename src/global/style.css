@@ -3831,3 +3831,33 @@ kbd{
   .demo-page .snippet-grid{gap:14px}
 }
 @media (min-width:901px){.subkeys-page-table-card{display:block!important}}
+
+/* ── Settings page ── */
+.settings-page{display:grid;gap:18px}
+.settings-page>.card{margin-bottom:0}
+.settings-mode-section{padding-top:8px}
+.settings-mode-option{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.settings-mode-indicator{flex-shrink:0}
+.settings-mode-info{flex:1;min-width:0}
+.settings-mode-features{font-size:14px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:8px}
+.settings-mode-features:first-child{margin-top:0}
+.settings-mode-check{color:var(--green);font-weight:700;font-size:16px;flex-shrink:0}
+.settings-domains-form{display:flex;gap:10px;margin-bottom:16px}
+.settings-domains-form input{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:10px 14px;color:var(--text);font-size:14px;font-family:var(--font-sans);outline:none;transition:var(--transition)}
+.settings-domains-form input:focus{border-color:var(--primary);background:var(--bg4);box-shadow:0 0 0 3px rgba(59,130,246,0.15)}
+.settings-domains-form input::placeholder{color:var(--dim)}
+.settings-domains-list{display:grid;gap:10px}
+.settings-domain-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);transition:var(--transition)}
+.settings-domain-row:hover{border-color:var(--border3);background:var(--bg4)}
+.settings-domain-check{color:var(--green);font-weight:700;font-size:18px;flex-shrink:0}
+.settings-domain-url{flex:1;font-family:var(--font-mono);font-size:13px;color:var(--text);word-break:break-all}
+@media (max-width:900px){
+  .settings-page{gap:14px}
+  .settings-domains-form{flex-direction:column}
+  .settings-domains-form .btn{width:100%;justify-content:center;min-height:44px}
+  .settings-mode-option{flex-direction:column;gap:10px}
+  .badge-warn{background:rgba(245,158,11,0.1);color:var(--amber)}
+  .badge-muted{background:var(--bg4);color:var(--muted)}
+}
+.badge-warn{background:rgba(245,158,11,0.1);color:var(--amber)}
+.badge-muted{background:var(--bg4);color:var(--muted)}

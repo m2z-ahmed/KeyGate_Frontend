@@ -18,8 +18,9 @@ import DangerPage from '../components/pages/DangerPage';
 import MembersPage from '../components/pages/MembersPage';
 import RolesPage from '../components/pages/RolesPage';
 import InvitesPage from '../components/pages/InvitesPage';
+import SettingsPage from '../components/pages/SettingsPage';
 
-const PLACEHOLDER_PAGES = new Set(['invoices', 'general', 'endpoint', 'security', 'audit', 'docs']);
+const PLACEHOLDER_PAGES = new Set(['invoices', 'endpoint', 'security', 'audit', 'docs']);
 
 
 function AccountSidebar({ page, navigate, onBack, drawerOpen = false, setDrawerOpen = () => {} }) {
@@ -80,6 +81,7 @@ const PAGES = {
   members: MembersPage,
   roles: RolesPage,
   invites: InvitesPage,
+  general: SettingsPage,
 };
 
 export default function ConsoleShell({ go, page, projectSlug, accountMode = false }) {

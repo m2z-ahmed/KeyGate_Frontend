@@ -38,6 +38,8 @@ export default function LethemProvider({ children, projectSlug, page }) {
   const [invites, setInvites] = useState([]);
   const [teamLoading, setTeamLoading] = useState(false);
   const [account, setAccount] = useState(null);
+  const [allowedDomains, setAllowedDomains] = useState([]);
+  const [projectMode, setProjectMode] = useState('test');
 
   const notify = (msg, type = 'success') => { setNotif({ show: true, msg, type }); setTimeout(() => setNotif((v) => ({ ...v, show: false })), 3000); };
 
@@ -255,6 +257,30 @@ export default function LethemProvider({ children, projectSlug, page }) {
     return res;
   };
 
+  const loadAllowedDomains = async () => {
+    const rows = await api('/api/allowed-domains', { noCache: true });
+    setAllowedDomains(rows);
+    return rows;
+  };
+
+  const addAllowedDomain = async (domain) => {
+    const res = await api('/api/allowed-domains', { method: 'POST', body: { domain } });
+    await loadAllowedDomains();
+    return res;
+  };
+
+  const removeAllowedDomain = async (id) => {
+    const res = await api(`/api/allowed-domains/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    await loadAllowedDomains();
+    return res;
+  };
+
+  const updateProjectMode = async (mode) => {
+    const res = await api('/api/projects/mode', { method: 'PATCH', body: { mode } });
+    setProjectMode(mode);
+    return res;
+  };
+
   const createProject = async (name) => {
     const projectLimit = billing?.plans?.find((plan) => plan.id === billing.currentPlan)?.limits?.projects ?? 3;
     if (projectLimit !== null && projects.length >= projectLimit) { notify(`Maximum ${projectLimit} projects allowed on your current plan`, 'error'); return null; }
@@ -299,7 +325,16 @@ export default function LethemProvider({ children, projectSlug, page }) {
       loadSubkeys().catch((e) => notify(e.message, 'error'));
       setLoading((v) => ({ ...v, subkeys: true }));
     }
+    if (page === 'general') {
+      loadAllowedDomains().catch((e) => notify(e.message, 'error'));
+      loadBilling().catch(() => {});
+    }
   }, [page, projectSlug]);
+
+  useEffect(() => {
+    const p = projects.find((p) => p.slug === projectSlug || p.id === projectSlug);
+    if (p?.mode) setProjectMode(p.mode);
+  }, [projects, projectSlug]);
 
   // Reset subkey loading when data arrives for demo/notifications
   useEffect(() => {
@@ -330,9 +365,11 @@ export default function LethemProvider({ children, projectSlug, page }) {
     api, notify, copyText, modal, setModal, revealedToken, setRevealedToken,
     loadMasterKeys, loadSubkeys, loadLogs, loadOverview, loadBilling, loadMembers, loadInvites, loadAccount, updateAccount,
     checkInvitee, inviteMember, acceptInvite, updateMemberRole, removeMember, revokeInvite, deleteInvite,
+    loadAllowedDomains, addAllowedDomain, removeAllowedDomain, updateProjectMode,
+    allowedDomains, projectMode,
     subkeys, setSubkeys, masterKeys, logs, analytics, billing, setBilling, members, invites, teamLoading, account, setAccount, page, loading, copiedItem,
     selectedProject: projects.find((p) => p.slug === projectSlug || p.id === projectSlug),
-  }), [modal, subkeys, masterKeys, logs, analytics, billing, members, invites, teamLoading, account, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub, projects]);
+  }), [modal, subkeys, masterKeys, logs, analytics, billing, members, invites, teamLoading, account, revealedToken, page, projectSlug, providers, loading, copiedItem, isAuthenticated, user?.sub, projects, allowedDomains, projectMode]);
 
   const value = useMemo(() => ({
     ctx,
