@@ -65,7 +65,7 @@ export default function LethemProvider({ children, projectSlug, page }) {
       ...opts.headers
     };
     const skipAuth = Boolean(opts.skipAuth || opts.headers?.Authorization);
-    const cacheScope = skipAuth ? 'public' : (user?.sub || 'anonymous');
+    const cacheScope = skipAuth ? 'public' : `${user?.sub || 'anonymous'}:${projectSlug || '__all__'}`;
     if (!skipAuth && isAuthenticated) {
       headers.Authorization = `Bearer ${await getAccessToken()}`;
       const idToken = await getIdToken();

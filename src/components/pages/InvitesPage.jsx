@@ -5,8 +5,30 @@ export default function InvitesPage({ ctx }) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('developer');
   const [busy, setBusy] = useState('');
+  const [inviteCheck, setInviteCheck] = useState(null);
   useEffect(() => { ctx.loadInvites?.().catch((e) => ctx.notify(e.message, 'error')); }, []);
-  const send = async () => { setBusy('send'); try { await ctx.inviteMember(email, role); setEmail(''); } catch (e) { ctx.notify(e.message, 'error'); } finally { setBusy(''); } };
+
+  const resetInviteCheck = () => setInviteCheck(null);
+
+  const sendInvite = async (targetEmail = email, targetRole = role) => {
+    setBusy('invite');
+    try {
+      await ctx.inviteMember(targetEmail, targetRole);
+      setEmail(''); setRole('developer'); resetInviteCheck();
+    } catch (e) { ctx.notify(e.message, 'error'); }
+    finally { setBusy(''); }
+  };
+
+  const invite = async () => {
+    setBusy('check'); resetInviteCheck();
+    try {
+      const check = await ctx.checkInvitee(email);
+      if (check.already_member) { ctx.notify('That user is already a member of this project.', 'error'); return; }
+      if (!check.exists) { setInviteCheck(check); return; }
+      await sendInvite(email, role);
+    } catch (e) { ctx.notify(e.message, 'error'); }
+    finally { setBusy(''); }
+  };
   const revoke = async (invite) => {
     if (!window.confirm(`Revoke invite for ${invite.email || invite.project_name || 'this user'}?`)) return;
     setBusy(invite.id); try { await ctx.revokeInvite(invite.id); } catch (e) { ctx.notify(e.message, 'error'); } finally { setBusy(''); }
@@ -30,7 +52,7 @@ export default function InvitesPage({ ctx }) {
   return (
     <section className='page active team-page invites-page'>
       <div className='page-header'><h1 className='page-title'>Invites</h1><p className='page-sub'>Accept project invites sent to you, or track invites you sent from this project.</p></div>
-      <div className='card invite-card'><div className='card-header'><div><div className='card-title'>Send invite</div><div className='card-sub'>Existing users receive in-app invites. New users receive email invite links.</div></div></div><div className='invite-form'><input value={email} onChange={(e) => setEmail(e.target.value)} placeholder='teammate@example.com' type='email' /><select value={role} onChange={(e) => setRole(e.target.value)}>{ASSIGNABLE_ROLES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}</select><button className='btn btn-primary' disabled={busy === 'send' || !email} onClick={send}>{busy === 'send' ? 'Sending…' : 'Send An Invite'}</button></div></div>
+      <div className='card invite-card'><div className='card-header'><div><div className='card-title'>Invite a teammate</div><div className='card-sub'>Existing Lethem users receive an in-app invite. New users get an email invite link.</div></div></div><div className='invite-form'><input value={email} onChange={(e) => { setEmail(e.target.value); resetInviteCheck(); }} placeholder='teammate@example.com' type='email' /><select value={role} onChange={(e) => setRole(e.target.value)}>{ASSIGNABLE_ROLES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}</select><button className='btn btn-primary' disabled={busy === 'check' || busy === 'invite' || !email} onClick={invite}>{busy === 'check' ? 'Checking…' : busy === 'invite' ? 'Sending…' : 'Check & Invite'}</button></div>{inviteCheck && !inviteCheck.exists && (<div className='invite-confirm-box'><div><strong>{inviteCheck.email}</strong> is not on Lethem yet. Send an email invite so they can sign up and join this project?</div><div className='row-actions'><button className='btn btn-ghost btn-sm' onClick={resetInviteCheck}>Cancel</button><button className='btn btn-primary btn-sm' disabled={busy === 'invite'} onClick={() => sendInvite(inviteCheck.email, role)}>Send Email Invite</button></div></div>)}</div>
       <div className='card invite-history-card'><div className='card-header'><div><div className='card-title'>Invites for you</div><div className='card-sub'>{received.length} invite{received.length === 1 ? '' : 's'} waiting for this account</div></div></div>{ctx.teamLoading ? <div className='empty'>Loading invites…</div> : received.length === 0 ? <div className='empty'><div className='empty-text'>No incoming invites.</div></div> : <><div className='table-wrap team-table-wrap'><table><thead><tr><th>Project</th><th>Role</th><th>Status</th><th>Expires</th><th>Actions</th></tr></thead><tbody>{renderRows(received, 'received')}</tbody></table></div>{renderCards(received, 'received')}</>}</div>
       <div className='card invite-history-card'><div className='card-header'><div><div className='card-title'>Sent invitation history</div><div className='card-sub'>{sent.length} invite{sent.length === 1 ? '' : 's'} sent from this project</div></div></div>{ctx.teamLoading ? <div className='empty'>Loading invites…</div> : sent.length === 0 ? <div className='empty'><div className='empty-text'>No invites sent yet.</div></div> : <><div className='table-wrap team-table-wrap'><table><thead><tr><th>Email</th><th>Role</th><th>Status</th><th>Expires</th><th>Actions</th></tr></thead><tbody>{renderRows(sent, 'sent')}</tbody></table></div>{renderCards(sent, 'sent')}</>}</div>
     </section>

@@ -20,6 +20,42 @@ export const FALLBACK_PROVIDERS = [
     { id: 'openai/gpt-oss-safeguard-20b', label: 'GPT-OSS Safeguard 20B' },
     { id: 'qwen/qwen3-32b', label: 'Qwen 3 32B' },
   ] },
+  { id: 'mistral', label: 'Mistral AI', default_model: 'mistral-small-latest', key_placeholder: 'BJtB...', models: [
+    { id: 'mistral-large-latest', label: 'Mistral Large 3' },
+    { id: 'mistral-medium-latest', label: 'Mistral Medium 3.5' },
+    { id: 'mistral-small-latest', label: 'Mistral Small 4' },
+    { id: 'codestral-latest', label: 'Codestral' },
+    { id: 'open-mistral-nemo', label: 'Mistral Nemo' },
+    { id: 'ministral-8b-latest', label: 'Ministral 8B' },
+    { id: 'pixtral-large-latest', label: 'Pixtral Large' },
+  ] },
+  { id: 'together', label: 'Together AI', default_model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', key_placeholder: 'api-key...', models: [
+    { id: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', label: 'Llama 3.3 70B' },
+    { id: 'meta-llama/Llama-3.1-8B-Instruct-Turbo', label: 'Llama 3.1 8B' },
+    { id: 'deepseek-ai/DeepSeek-V3', label: 'DeepSeek V3' },
+    { id: 'deepseek-ai/DeepSeek-R1', label: 'DeepSeek R1' },
+    { id: 'meta-llama/Llama-4-Scout-17B-16E-Instruct', label: 'Llama 4 Scout' },
+    { id: 'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8', label: 'Llama 4 Maverick' },
+    { id: 'openai/gpt-oss-20b', label: 'GPT-OSS 20B' },
+    { id: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B' },
+  ] },
+  { id: 'openrouter', label: 'OpenRouter', default_model: 'openai/gpt-4o-mini', key_placeholder: 'sk-or-...', models: [
+    { id: 'openai/gpt-4o-mini', label: 'GPT-4o mini' },
+    { id: 'openai/gpt-4o', label: 'GPT-4o' },
+    { id: 'anthropic/claude-sonnet-4.5', label: 'Claude Sonnet 4.5' },
+    { id: 'anthropic/claude-haiku-4.5', label: 'Claude Haiku 4.5' },
+    { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+    { id: 'google/gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+    { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B' },
+    { id: 'deepseek/deepseek-chat', label: 'DeepSeek Chat' },
+    { id: 'mistral/mistral-large-latest', label: 'Mistral Large 3' },
+  ] },
+  { id: 'perplexity', label: 'Perplexity', default_model: 'sonar', key_placeholder: 'pplx-...', models: [
+    { id: 'sonar', label: 'Sonar' },
+    { id: 'sonar-pro', label: 'Sonar Pro' },
+    { id: 'sonar-reasoning', label: 'Sonar Reasoning' },
+    { id: 'sonar-reasoning-pro', label: 'Sonar Reasoning Pro' },
+  ] },
 ];
 
 export const providerLabel = (providers, id) => (providers || FALLBACK_PROVIDERS).find((p) => p.id === id)?.label || id || 'Unknown';
