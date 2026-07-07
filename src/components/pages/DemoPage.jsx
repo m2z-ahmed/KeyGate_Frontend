@@ -60,7 +60,7 @@ export default function DemoPage({ ctx }) {
   const snippetCard = (title, code) => <div className='card copy-btn' onClick={() => { navigator.clipboard.writeText(code); setCopiedSnippet(title); setTimeout(() => setCopiedSnippet(''), 1600); }} style={{ cursor: 'pointer' }}><div className='card-title' style={{display:'flex',alignItems:'center',gap:8}}>{title}{copiedSnippet === title ? <><IconCheck width={14} height={14} style={{color:'var(--green)'}} /> <span style={{fontSize:11,color:'var(--green)',fontWeight:500}}>Copied!</span></> : <IconCopy width={14} height={14} style={{color:'var(--muted)'}} />}</div><pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'DM Mono, monospace', fontSize: '12px', marginTop: '8px' }}>{code}</pre>{copiedSnippet === title && <span className='copy-flash'>Copied!</span>}</div>;
 
   return <div className='page active demo-page'><div style={{ padding: '32px 36px' }}><div className='page-header'><div className='page-title'>Live demo</div><div className='page-sub'>See exactly how a client uses a subkey — without ever knowing the real key</div></div>
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+    <div className='demo-grid'>
       <div className='card'><div className='card-header'><div className='card-title'>Configure test call</div></div>
         {!active.length && <div className='empty-text'>No active subkeys. <button className='btn btn-sm btn-ghost' onClick={()=>{ window.history.pushState({},'',window.location.pathname.replace('/demo','/subkeys')); window.dispatchEvent(new PopStateEvent('popstate')); }}>Create Subkey</button></div>}
         <div className='field' style={{marginBottom:10}}><label>Subkey to test</label><select value={selectedSubkeyId} onChange={(e) => setSelectedSubkeyId(e.target.value)}><option value=''>— select a subkey —</option>{active.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></div>
@@ -71,6 +71,6 @@ export default function DemoPage({ ctx }) {
       <div className='card' style={{ background: '#060609' }}><div className='card-title' style={{ color: 'var(--text)' }}>What the client sends</div><pre style={{ fontFamily: 'DM Mono, monospace', fontSize: '12px', color: 'var(--text)', lineHeight: 1.9, whiteSpace: 'pre-wrap', marginTop: '8px' }}>{preview}</pre></div>
     </div>
     <div className='console'><div className='console-bar'><div className='dot r' /><div className='dot y' /><div className='dot g' /><span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '8px' }}>Lethem proxy console</span></div><div className='console-body'>{consoleLines.map((l, i) => <p key={i} className='console-line'>{l}</p>)}</div></div>
-    <div className='snippet-grid' style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>{snippetCard('Auto-generated JS snippet (click to copy)', jsSnippet)}{snippetCard('Auto-generated Python snippet (click to copy)', pySnippet)}{snippetCard('Auto-generated cURL snippet (click to copy)', curlSnippet)}</div>
+    <div className='snippet-grid' style={{ marginTop: '18px' }}>{snippetCard('Auto-generated JS snippet (click to copy)', jsSnippet)}{snippetCard('Auto-generated Python snippet (click to copy)', pySnippet)}{snippetCard('Auto-generated cURL snippet (click to copy)', curlSnippet)}</div>
   </div></div>;
 }
