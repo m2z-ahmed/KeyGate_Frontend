@@ -3833,8 +3833,7 @@ kbd{
 @media (min-width:901px){.subkeys-page-table-card{display:block!important}}
 
 /* ── Settings page ── */
-.settings-page{display:grid;gap:18px}
-.settings-page>.card{margin-bottom:0}
+.settings-page{display:grid;gap:32px}
 .settings-mode-section{padding-top:8px}
 .settings-mode-option{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
 .settings-mode-indicator{flex-shrink:0}
@@ -3852,7 +3851,7 @@ kbd{
 .settings-domain-check{color:var(--green);font-weight:700;font-size:18px;flex-shrink:0}
 .settings-domain-url{flex:1;font-family:var(--font-mono);font-size:13px;color:var(--text);word-break:break-all}
 @media (max-width:900px){
-  .settings-page{gap:14px}
+  .settings-page{gap:24px}
   .settings-domains-form{flex-direction:column}
   .settings-domains-form .btn{width:100%;justify-content:center;min-height:44px}
   .settings-mode-option{flex-direction:column;gap:10px}
